@@ -14,6 +14,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.browser_controller import create_driver, close_driver
 from src.json_handler import load_tasks, save_tasks
 from src.flow_automator import FlowAutomator
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
 def step_log(num, title):
     print(f"\n{'=' * 60}")

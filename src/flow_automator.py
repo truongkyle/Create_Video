@@ -353,11 +353,15 @@ class FlowAutomator:
                     for btn in visible_retries:
                         try:
                             human_click(self.driver, btn)
-                            time.sleep(1)
+                            time.sleep(3)  # 3 seconds between each retry click
                         except Exception:
                             pass
-                    # Reset the timeout clock slightly to give retries a chance
-                    start = time.time() - (RENDER_TIMEOUT // 2) 
+                    # Wait for the retried video to START regenerating
+                    # Google Flow needs time to re-queue the render job
+                    logger.info("Waiting 30s for retried video(s) to start regenerating...")
+                    time.sleep(30)
+                    # Reset the timeout clock to give retried videos full render time
+                    start = time.time()
                     continue
                 else:
                     logger.error("Max retries reached for failed tiles. Proceeding with any successful ones.")
@@ -384,105 +388,161 @@ class FlowAutomator:
 
         logger.info("Render polling complete (either success, timeout, or max retries)")
 
-    # --- Step 8: Download ---
+    # --- Step 8: Download (ZIP Project Export) ---
     def step_download(self, task):
-        download_folder = task.get("link_folder_video", "")
-        if download_folder:
-            Path(download_folder).mkdir(parents=True, exist_ok=True)
-            set_download_dir(self.driver, download_folder)
-
-        # Method 3: Native Detail View Download (User requested flow)
-        # Find all <a> tags that contain a <video> element
+        import zipfile
+        import shutil
+        import glob
         from selenium.webdriver.common.by import By
-        
-        def get_tiles():
-            for _ in range(5):
-                t = self.driver.find_elements(By.XPATH, "//a[.//video]")
-                if not t:
-                    t = self.driver.find_elements(By.CSS_SELECTOR, "video")
-                if t:
-                    return t
-                human_delay(1, 1) # Wait for React DOM to paint
-            return []
-            
-        initial_tiles = get_tiles()
-        tiles_count = len(initial_tiles)
-            
-        logger.info(f"Found {tiles_count} video tile(s) ready for download")
-        
-        success_count = 0
-        for idx in range(tiles_count):
+
+        output_folder = task.get("link_folder_video", "")
+        if not output_folder:
+            output_folder = str(Path(__file__).resolve().parent.parent / "output")
+        Path(output_folder).mkdir(parents=True, exist_ok=True)
+
+        # Use Chrome's DEFAULT downloads folder — do NOT call set_download_dir()
+        # as it can redirect downloads to unexpected locations via CDP override.
+        download_dir = str(Path.home() / "Downloads")
+
+        # Record existing ZIP files so we can detect the new one later
+        existing_zips = set(glob.glob(str(Path(download_dir) / "*.zip")))
+
+        # 1. Click the project-level 3-dot menu icon (more_vert) to open grid menu
+        # IMPORTANT: There are multiple more_vert buttons on the page (one per video tile).
+        # The PROJECT-level 3-dot menu has a unique class 'sc-10cb148f-1'.
+        logger.info("Clicking project 3-dot menu (more_vert)...")
+        settings_btn = None
+        try:
+            # Most specific: use the unique project-menu class
+            settings_btn = self.driver.find_element(By.CSS_SELECTOR, "button.sc-10cb148f-1")
+        except Exception:
+            pass
+        if not settings_btn:
             try:
-                # Re-fetch tiles on every loop to avoid StaleElementReferenceException
-                # after Google Flow's React SPA navigates back and destroys old DOM nodes.
-                fresh_tiles = get_tiles()
-                if idx >= len(fresh_tiles):
-                    logger.warning(f"  -> Tile {idx+1} disappeared from DOM. Skipping.")
-                    continue
-                    
-                tile = fresh_tiles[idx]
-                
-                # 1. Click into the video detail view
-                logger.info(f"Processing Video {idx+1}/{tiles_count}")
-                human_click(self.driver, tile)
-                human_delay(2, 4)
-                
-                # 2. Click the Native Download button
-                # The user noted it might have text "Tải xuống" or an icon with "download"
-                download_btn = find_by_text(self.driver, "*", "Tải xuống", timeout=5)
-                if not download_btn:
-                    download_btn = find_by_text(self.driver, "*", "Download", timeout=3)
-                    
-                if download_btn:
-                    human_click(self.driver, download_btn)
-                    logger.info(f"  -> Clicked 'Tải xuống' for Video {idx+1}")
-                    human_delay(1, 2) # Wait for Radix menu to open
-                    
-                    quality = task.get("flow_settings", {}).get("download_quality", "720p")
-                    quality_btn = find_by_text(self.driver, "span", quality, timeout=3)
-                    if quality_btn:
-                        # Sometimes human_click falls back to JS click which is perfect for Radix menus
-                        human_click(self.driver, quality_btn)
-                        logger.info(f"  -> Selected '{quality}' resolution for Video {idx+1}")
+                # Fallback: find by hidden text 'Khác' which is unique to this button
+                settings_btn = self.driver.find_element(By.XPATH, "//button[.//span[text()='Khác']]")
+            except Exception:
+                pass
+        if not settings_btn:
+            try:
+                # Last resort: more_vert icon with aria-haspopup=menu
+                btns = self.driver.find_elements(By.XPATH, "//button[@aria-haspopup='menu'][.//i[contains(text(), 'more_vert')]]")
+                if btns:
+                    settings_btn = btns[-1]  # The project-level one is typically the last one
+            except Exception:
+                pass
+
+        if not settings_btn:
+            raise RuntimeError("Cannot find project 3-dot menu button (more_vert icon)")
+
+        human_click(self.driver, settings_btn)
+        human_delay(1, 2)
+        logger.info("✅ Project 3-dot menu clicked successfully")
+        
+        # Verify the menu actually opened by checking for aria-expanded or menu content
+        try:
+            menu_state = settings_btn.get_attribute("aria-expanded")
+            logger.info(f"Menu aria-expanded state: {menu_state}")
+        except Exception:
+            pass
+
+        # 2. Click 'Tải dự án xuống' (Download Project) from the Radix dropdown
+        logger.info("Clicking 'Tải dự án xuống'...")
+        download_project_btn = find_by_text(self.driver, "*", "Tải dự án xuống", timeout=5)
+        if not download_project_btn:
+            download_project_btn = find_by_text(self.driver, "*", "Download project", timeout=3)
+        if not download_project_btn:
+            # Fallback: find menuitem with download icon
+            try:
+                download_project_btn = self.driver.find_element(By.XPATH, "//button[@role='menuitem'][.//i[contains(text(), 'download')]]")
+            except Exception:
+                pass
+
+        if not download_project_btn:
+            raise RuntimeError("Cannot find 'Tải dự án xuống' button in grid menu")
+
+        human_click(self.driver, download_project_btn)
+        logger.info("✅ 'Tải dự án xuống' clicked — ZIP download initiated")
+        human_delay(3, 5)  # Give Chrome time to start the download
+
+        # 3. Wait for the ZIP file to finish downloading
+        zip_path = self._wait_for_zip(download_dir, existing_zips, timeout=120)
+        if not zip_path:
+            raise RuntimeError("ZIP download timed out or failed")
+
+        logger.info(f"ZIP downloaded: {zip_path}")
+
+        # 4. Extract only video files (.mp4, .webm, .mov) to the output folder
+        extracted_count = 0
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                for file_info in zf.infolist():
+                    fname = file_info.filename
+                    ext = Path(fname).suffix.lower()
+                    if ext in ('.mp4', '.webm', '.mov'):
+                        # Extract to a flat structure (no nested folders)
+                        basename = Path(fname).name
+                        target_path = Path(output_folder) / basename
+
+                        # Handle duplicate names
+                        counter = 1
+                        while target_path.exists():
+                            stem = Path(fname).stem
+                            target_path = Path(output_folder) / f"{stem}_{counter}{ext}"
+                            counter += 1
+
+                        with zf.open(file_info) as src, open(target_path, 'wb') as dst:
+                            shutil.copyfileobj(src, dst)
+
+                        logger.info(f"  -> Extracted: {basename} ({file_info.file_size / 1024:.0f} KB)")
+                        extracted_count += 1
                     else:
-                        logger.warning(f"  -> Could not find '{quality}' resolution option. It might default or be unavailable.")
-                        
-                    human_delay(5, 8) # Wait for file to download to disk natively
-                    success_count += 1
-                else:
-                    logger.warning(f"  -> Could not find 'Tải xuống' button inside detail view for Video {idx+1}")
-                
-                # 3. Click the Back button "Quay lại" (arrow_back)
-                back_btn = None
-                try:
-                    # Search for the button with the arrow_back icon explicitly
-                    back_btn = self.driver.find_element(By.XPATH, "//button[.//i[contains(text(), 'arrow_back')]]")
-                except Exception:
-                    pass
-                
-                if not back_btn:
-                    try:
-                        # Fallback for hidden Quay lại text span
-                        back_btn = self.driver.find_element(By.XPATH, "//button[.//span[contains(text(), 'Quay lại') or contains(text(), 'Back')]]")
-                    except Exception:
-                        pass
-                        
-                if back_btn:
-                    # the button might be visually clipped (screen-reader only span),
-                    # human_click will safely fall back to JS click if native click fails.
-                    human_click(self.driver, back_btn)
-                    logger.info("  -> Clicked 'Quay lại' (Back) button")
-                    human_delay(2, 3)
-                else:
-                    logger.warning("  -> Could not find 'Quay lại' button, trying browser escaping")
-                    self.driver.execute_script("document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));")
-                    human_delay(2, 3)
-                    
-            except Exception as e:
-                logger.error(f"  -> Failed to download Video {idx+1}: {e}")
-                
-        if success_count > 0:
-            logger.info(f"Successfully triggered {success_count} native downloads. Waiting final buffer time...")
-            human_delay(15, 20) # Buffer to ensure all active downloads finish before close
+                        logger.debug(f"  -> Skipped non-video file: {fname}")
+        except zipfile.BadZipFile:
+            raise RuntimeError(f"Downloaded file is not a valid ZIP: {zip_path}")
+
+        # 5. Clean up the ZIP file
+        try:
+            Path(zip_path).unlink()
+            logger.info(f"Cleaned up ZIP: {Path(zip_path).name}")
+        except Exception as e:
+            logger.warning(f"Failed to delete ZIP: {e}")
+
+        if extracted_count > 0:
+            logger.info(f"✅ Successfully extracted {extracted_count} video(s) to {output_folder}")
         else:
-            raise RuntimeError("No videos were successfully downloaded")
+            raise RuntimeError("ZIP contained no video files (.mp4/.webm/.mov)")
+
+    def _wait_for_zip(self, download_dir, existing_zips, timeout=120):
+        """Polls the download directory for a new ZIP file, waiting for completion."""
+        import glob
+        start = time.time()
+        logged_files = set()
+        while time.time() - start < timeout:
+            # Scan for ALL new files (not just .zip) to detect downloads
+            all_files = set(glob.glob(str(Path(download_dir) / "*")))
+            new_files = all_files - existing_zips
+            for f in new_files:
+                if f not in logged_files:
+                    logger.info(f"  [ZIP_WAIT] New file detected: {Path(f).name}")
+                    logged_files.add(f)
+            
+            current_zips = set(glob.glob(str(Path(download_dir) / "*.zip")))
+            new_zips = current_zips - existing_zips
+
+            if new_zips:
+                zip_path = list(new_zips)[0]
+                crdownload = zip_path + ".crdownload"
+                if not Path(crdownload).exists():
+                    size1 = Path(zip_path).stat().st_size
+                    time.sleep(2)
+                    size2 = Path(zip_path).stat().st_size
+                    if size1 == size2 and size2 > 0:
+                        return zip_path
+
+            elapsed = int(time.time() - start)
+            if elapsed % 10 == 0 and elapsed > 0:
+                logger.info(f"  Waiting for ZIP download... {elapsed}s")
+            time.sleep(2)
+
+        return None
