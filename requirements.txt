@@ -3,3 +3,5 @@ selenium>=4.15.0
 python-dotenv>=1.0.0
 schedule>=1.2.0
 setuptools>=75.0.0
+customtkinter>=5.2.0
+Pillow>=10.0.0

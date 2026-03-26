@@ -96,6 +96,56 @@ def validate_login(driver):
     return is_logged_in
 
 
+def validate_cookies(cookies_data):
+    """Validate cookie data structure. Returns (is_valid, message)."""
+    if not isinstance(cookies_data, list):
+        return False, "Dữ liệu cookies phải là một danh sách (JSON array)"
+
+    if len(cookies_data) == 0:
+        return False, "Danh sách cookies trống"
+
+    required_fields = {"name", "value"}
+    for i, cookie in enumerate(cookies_data):
+        if not isinstance(cookie, dict):
+            return False, f"Cookie #{i+1} không phải object"
+        missing = required_fields - set(cookie.keys())
+        if missing:
+            return False, f"Cookie #{i+1} thiếu field: {', '.join(missing)}"
+
+    return True, f"✅ Hợp lệ — {len(cookies_data)} cookies"
+
+
+def import_cookies_from_text(json_text):
+    """Parse JSON text, validate, and save to cookies.json. Returns (success, message)."""
+    try:
+        cookies_data = json.loads(json_text)
+    except json.JSONDecodeError as e:
+        return False, f"❌ JSON không hợp lệ: {e}"
+
+    is_valid, msg = validate_cookies(cookies_data)
+    if not is_valid:
+        return False, f"❌ {msg}"
+
+    with open(COOKIES_PATH, "w", encoding="utf-8") as f:
+        json.dump(cookies_data, f, ensure_ascii=False, indent=2)
+
+    logger.info(f"Imported {len(cookies_data)} cookies from text input")
+    return True, f"✅ Đã lưu {len(cookies_data)} cookies vào {COOKIES_PATH.name}"
+
+
+def has_valid_cookies():
+    """Check if a valid cookies file exists."""
+    if not COOKIES_PATH.exists():
+        return False, "❌ Chưa có file cookies.json"
+    try:
+        with open(COOKIES_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        is_valid, msg = validate_cookies(data)
+        return is_valid, msg
+    except Exception as e:
+        return False, f"❌ Lỗi đọc cookies: {e}"
+
+
 def first_time_login(driver, flow_url):
     print("\n" + "=" * 60)
     print("  LẦN ĐẦU CHẠY — CẦN ĐĂNG NHẬP THỦ CÔNG")
