@@ -61,8 +61,7 @@ class ProjectPanel(ctk.CTkFrame):
         )
         self.detail_placeholder.pack(expand=True)
 
-        # ── Bottom: Action bar ──
-        self._build_action_bar()
+        self.detail_placeholder.pack(expand=True)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #  SIDEBAR (Left Column)
@@ -123,69 +122,6 @@ class ProjectPanel(ctk.CTkFrame):
                 height=30, fg_color=fg, hover_color=hover,
                 command=cmd,
             ).pack(side="left", expand=True, fill="x", padx=2)
-
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    #  ACTION BAR (Bottom)
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    def _build_action_bar(self):
-        bar = ctk.CTkFrame(
-            self, fg_color=COLORS["bg_card"], height=52,
-            corner_radius=SIZES["corner_radius"],
-            border_color=COLORS["border"], border_width=1,
-        )
-        bar.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(SIZES["padding_sm"], 0))
-        bar.pack_propagate(False)
-
-        # Mode selector
-        self.mode_var = ctk.StringVar(value="Tuần tự")
-        mode_seg = ctk.CTkSegmentedButton(
-            bar, values=["Tuần tự", "Song song"],
-            variable=self.mode_var, font=FONTS["small"],
-            height=32,
-            fg_color=COLORS["bg_input"],
-            selected_color=COLORS["accent"],
-            selected_hover_color=COLORS["accent_hover"],
-            unselected_color=COLORS["bg_input"],
-            unselected_hover_color=COLORS["bg_hover"],
-        )
-        mode_seg.pack(side="left", padx=SIZES["padding_sm"])
-
-        # Worker count dropdown
-        self.workers_var = ctk.StringVar(value="2")
-        self.workers_menu = ctk.CTkOptionMenu(
-            bar, values=["1", "2", "3", "4"],
-            variable=self.workers_var, font=FONTS["small"],
-            width=80, height=32,
-            fg_color=COLORS["bg_input"],
-            button_color=COLORS["bg_hover"],
-            button_hover_color=COLORS["border"],
-            dropdown_fg_color=COLORS["bg_card"],
-            dropdown_hover_color=COLORS["bg_hover"],
-        )
-        self.workers_menu.pack(side="left")
-
-        ctk.CTkLabel(
-            bar, text="workers", font=FONTS["small"],
-            text_color=COLORS["text_muted"],
-        ).pack(side="left", padx=(4, SIZES["padding"]))
-
-        # Run buttons (right side)
-        self.btn_run_selected = ctk.CTkButton(
-            bar, text="▶ Chạy đã chọn", font=FONTS["body"],
-            height=36, width=160,
-            fg_color=COLORS["accent"], hover_color=COLORS["accent_hover"],
-            command=self._run_selected,
-        )
-        self.btn_run_selected.pack(side="right", padx=SIZES["padding_sm"])
-
-        self.btn_run_all = ctk.CTkButton(
-            bar, text="▶ Chạy tất cả", font=FONTS["body"],
-            height=36, width=160,
-            fg_color=COLORS["success"], hover_color="#2ea043",
-            command=self._run_all,
-        )
-        self.btn_run_all.pack(side="right")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #  DATA OPERATIONS
@@ -658,24 +594,6 @@ class ProjectPanel(ctk.CTkFrame):
                 justify="center",
             )
             self.detail_placeholder.pack(expand=True)
-
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    #  RUN (Placeholder — will be implemented in Phase 6)
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    def _run_all(self):
-        pending = [t for t in self.tasks if t.get("status") in ("pending", None)]
-        if not pending:
-            messagebox.showinfo("Không có", "Không có dự án pending nào để chạy")
-            return
-        messagebox.showinfo("Phase 6", f"Sẽ chạy {len(pending)} dự án pending.\n(Chức năng chạy sẽ được kết nối ở Phase 6)")
-
-    def _run_selected(self):
-        selected = [i for i, var in self.check_vars.items() if var.get()]
-        if not selected:
-            messagebox.showwarning("Chưa chọn", "Vui lòng tick ☑ các dự án muốn chạy")
-            return
-        messagebox.showinfo("Phase 6", f"Sẽ chạy {len(selected)} dự án đã chọn.\n(Chức năng chạy sẽ được kết nối ở Phase 6)")
 
     def get_selected_tasks(self):
         return [self.tasks[i] for i, var in self.check_vars.items() if var.get()]
