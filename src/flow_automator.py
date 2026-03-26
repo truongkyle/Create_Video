@@ -388,17 +388,117 @@ class FlowAutomator:
 
         logger.info("Render polling complete (either success, timeout, or max retries)")
 
-    # --- Step 8: Download (ZIP Project Export) ---
+    # --- Step 8: Download Router ---
     def step_download(self, task):
-        import zipfile
-        import shutil
-        import glob
-        from selenium.webdriver.common.by import By
-
+        settings = task.get("flow_settings", {})
+        # Decide which download method to use (default to zip)
+        method = settings.get("download_method", "zip").lower()
+        
         output_folder = task.get("link_folder_video", "")
         if not output_folder:
             output_folder = str(Path(__file__).resolve().parent.parent / "output")
         Path(output_folder).mkdir(parents=True, exist_ok=True)
+
+        if method == "individual":
+            logger.info("Using 'individual' download method (Native click-by-click)")
+            self._download_individual(task, output_folder)
+        else:
+            logger.info("Using 'zip' download method (Bulk Project Export)")
+            self._download_zip_project(task, output_folder)
+
+    def _download_individual(self, task, download_folder):
+        """Original download method: Clicks into each video and downloads natively."""
+        set_download_dir(self.driver, download_folder)
+
+        def get_tiles():
+            for _ in range(5):
+                t = self.driver.find_elements(By.XPATH, "//a[.//video]")
+                if not t:
+                    t = self.driver.find_elements(By.CSS_SELECTOR, "video")
+                if t:
+                    return t
+                human_delay(1, 1) # Wait for React DOM to paint
+            return []
+            
+        initial_tiles = get_tiles()
+        tiles_count = len(initial_tiles)
+            
+        logger.info(f"Found {tiles_count} video tile(s) ready for download")
+        
+        success_count = 0
+        for idx in range(tiles_count):
+            try:
+                # Re-fetch tiles to avoid StaleElementReferenceException
+                fresh_tiles = get_tiles()
+                if idx >= len(fresh_tiles):
+                    logger.warning(f"  -> Tile {idx+1} disappeared from DOM. Skipping.")
+                    continue
+                    
+                tile = fresh_tiles[idx]
+                
+                logger.info(f"Processing Video {idx+1}/{tiles_count}")
+                human_click(self.driver, tile)
+                human_delay(2, 4)
+                
+                download_btn = find_by_text(self.driver, "*", "Tải xuống", timeout=5)
+                if not download_btn:
+                    download_btn = find_by_text(self.driver, "*", "Download", timeout=3)
+                    
+                if download_btn:
+                    human_click(self.driver, download_btn)
+                    logger.info(f"  -> Clicked 'Tải xuống' for Video {idx+1}")
+                    human_delay(1, 2)
+                    
+                    quality = task.get("flow_settings", {}).get("download_quality", "720p")
+                    quality_btn = find_by_text(self.driver, "span", quality, timeout=3)
+                    if quality_btn:
+                        human_click(self.driver, quality_btn)
+                        logger.info(f"  -> Selected '{quality}' resolution for Video {idx+1}")
+                    else:
+                        logger.warning(f"  -> Could not find '{quality}' resolution option.")
+                        
+                    human_delay(5, 8) # Wait for disk write
+                    success_count += 1
+                else:
+                    logger.warning(f"  -> Could not find 'Tải xuống' button inside detail view for Video {idx+1}")
+                
+                # Click the Back button "Quay lại" (arrow_back)
+                back_btn = None
+                try:
+                    back_btn = self.driver.find_element(By.XPATH, "//button[.//i[contains(text(), 'arrow_back')]]")
+                except Exception:
+                    pass
+                if not back_btn:
+                    try:
+                        back_btn = self.driver.find_element(By.XPATH, "//button[.//span[contains(text(), 'Quay lại') or contains(text(), 'Back')]]")
+                    except Exception:
+                        pass
+                        
+                if back_btn:
+                    human_click(self.driver, back_btn)
+                    logger.info("  -> Clicked 'Quay lại' (Back) button")
+                    human_delay(2, 3)
+                else:
+                    logger.warning("  -> Could not find 'Quay lại' button, trying browser escaping")
+                    from selenium.webdriver.common.action_chains import ActionChains
+                    from selenium.webdriver.common.keys import Keys
+                    ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+                    human_delay(2, 3)
+                    
+            except Exception as e:
+                logger.error(f"  -> Failed to download Video {idx+1}: {e}")
+                
+        if success_count > 0:
+            logger.info(f"Successfully triggered {success_count} native downloads. Waiting final buffer time...")
+            human_delay(15, 20)
+        else:
+            raise RuntimeError("No videos were successfully downloaded")
+
+    def _download_zip_project(self, task, output_folder):
+        import zipfile
+        import shutil
+        import glob
+        from selenium.webdriver.common.by import By
 
         # Use Chrome's DEFAULT downloads folder — do NOT call set_download_dir()
         # as it can redirect downloads to unexpected locations via CDP override.

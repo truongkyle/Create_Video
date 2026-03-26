@@ -7,17 +7,16 @@
     "style": "cinematic",
     "link_folder_video": "D:\\Automation\\Create_Video\\output",
     "kenh_dang": "TikTok",
-
     "flow_settings": {
       "type": "VIDEO",
       "mode": "VIDEO_REFERENCES",
       "ratio": "PORTRAIT",
       "count": 2,
       "model": "Veo 3.1 - Fast",
-      "download_quality": "720p"
+      "download_quality": "720p",
+      "download_method": "zip"
     },
-
-    "status": "pending",
+    "status": "completed",
     "timestamp": "2026-03-25 21:58:22",
     "error": null,
     "video_path": null,
@@ -25,6 +24,7 @@
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-17_e4a70f819b474f15b9eaff98df4e5bb9_master.jpg",
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-2_ec13c9fc73c94adbab8ddb3461c81ad8_master.jpg",
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-3_c55433c112b54461bf12fefa64b5a88e_master.jpg"
-    ]
+    ],
+    "error_reason": "ZIP contained no video files (.mp4/.webm/.mov)"
   }
 ]
