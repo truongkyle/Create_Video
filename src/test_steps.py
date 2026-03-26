@@ -54,9 +54,9 @@ def main():
             func(task)
             print(f"  [OK] Step '{name}' completed.")
             
-            # Optional: pause before generate so user can verify everything looks good
+            # Optional: Log progress before generation
             if name == "configure_settings":
-                pause("Settings Configured. Ready to click GENERATE? ENTER... ")
+                print("  >> Settings Configured. Proceeding to Generation automatically...")
             elif name == "generate":
                 print("  >> Waiting for render. Please wait (this could take a few minutes)...")
                 
@@ -64,7 +64,7 @@ def main():
         print(f"\n[FAIL] Pipeline failed at step {automator.current_step}: {e}")
         import traceback
         traceback.print_exc()
-        pause("Check browser state. ENTER to close... ")
+        print("Closing browser...")
     finally:
         # Don't save tasks right now, since it might overwrite status to 'processing' without finishing
         # save_tasks(tasks)

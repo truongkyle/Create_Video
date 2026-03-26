@@ -396,10 +396,14 @@ class FlowAutomator:
         from selenium.webdriver.common.by import By
         
         def get_tiles():
-            t = self.driver.find_elements(By.XPATH, "//a[.//video]")
-            if not t:
-                t = self.driver.find_elements(By.CSS_SELECTOR, "video")
-            return t
+            for _ in range(5):
+                t = self.driver.find_elements(By.XPATH, "//a[.//video]")
+                if not t:
+                    t = self.driver.find_elements(By.CSS_SELECTOR, "video")
+                if t:
+                    return t
+                human_delay(1, 1) # Wait for React DOM to paint
+            return []
             
         initial_tiles = get_tiles()
         tiles_count = len(initial_tiles)
@@ -449,17 +453,25 @@ class FlowAutomator:
                     logger.warning(f"  -> Could not find 'Tải xuống' button inside detail view for Video {idx+1}")
                 
                 # 3. Click the Back button "Quay lại" (arrow_back)
-                back_btn = find_by_text(self.driver, "span", "Quay lại", timeout=5)
+                back_btn = None
+                try:
+                    # Search for the button with the arrow_back icon explicitly
+                    back_btn = self.driver.find_element(By.XPATH, "//button[.//i[contains(text(), 'arrow_back')]]")
+                except Exception:
+                    pass
+                
                 if not back_btn:
-                    back_btn = find_by_text(self.driver, "span", "Back", timeout=3)
-                if not back_btn:
-                    # Fallback to finding back arrow icon
-                    back_icon = find_by_text(self.driver, "i", "arrow_back", timeout=3)
-                    if back_icon:
-                        back_btn = back_icon.find_element(By.XPATH, "./..")
+                    try:
+                        # Fallback for hidden Quay lại text span
+                        back_btn = self.driver.find_element(By.XPATH, "//button[.//span[contains(text(), 'Quay lại') or contains(text(), 'Back')]]")
+                    except Exception:
+                        pass
                         
                 if back_btn:
+                    # the button might be visually clipped (screen-reader only span),
+                    # human_click will safely fall back to JS click if native click fails.
                     human_click(self.driver, back_btn)
+                    logger.info("  -> Clicked 'Quay lại' (Back) button")
                     human_delay(2, 3)
                 else:
                     logger.warning("  -> Could not find 'Quay lại' button, trying browser escaping")
