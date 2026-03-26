@@ -7,11 +7,13 @@ Phase 4: Form chi tiết (sẽ bổ sung sau)
 
 import json
 import copy
+import os
 import sys
 from pathlib import Path
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
+from PIL import Image as PILImage
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -277,25 +279,285 @@ class ProjectPanel(ctk.CTkFrame):
         self._show_detail(index)
 
     def _show_detail(self, index):
-        """Show project detail in right panel. Placeholder for Phase 4."""
-        # Clear existing detail
+        """Build the full editing form for the selected project."""
         for widget in self.detail_frame.winfo_children():
             widget.destroy()
 
         task = self.tasks[index]
-        name = task.get("ten_san_pham", f"Dự án {index + 1}")
+        fs = task.get("flow_settings", {})
+
+        scroll = ctk.CTkScrollableFrame(
+            self.detail_frame, fg_color="transparent",
+            scrollbar_button_color=COLORS["bg_hover"],
+            scrollbar_button_hover_color=COLORS["border"],
+        )
+        scroll.pack(fill="both", expand=True, padx=SIZES["padding"], pady=SIZES["padding"])
+
+        pad = {"fill": "x", "pady": (0, 4)}
+        pad_section = {"fill": "x", "pady": (SIZES["padding_sm"], 4)}
+
+        # ── Product Name ──
+        ctk.CTkLabel(scroll, text="Tên sản phẩm", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad)
+        self._detail_name = ctk.CTkEntry(
+            scroll, font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_name.pack(**pad)
+        self._detail_name.insert(0, task.get("ten_san_pham", ""))
+
+        # ── Description ──
+        ctk.CTkLabel(scroll, text="Mô tả sản phẩm", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad_section)
+        self._detail_desc = ctk.CTkTextbox(
+            scroll, height=60, font=FONTS["body"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_desc.pack(**pad)
+        self._detail_desc.insert("0.0", task.get("mo_ta_san_pham", ""))
+
+        # ── Prompt ──
+        ctk.CTkLabel(scroll, text="Prompt", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad_section)
+        self._detail_prompt = ctk.CTkTextbox(
+            scroll, height=100, font=FONTS["body"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_prompt.pack(**pad)
+        self._detail_prompt.insert("0.0", task.get("prompt", ""))
+
+        # ── Image Folder ──
+        ctk.CTkLabel(scroll, text="Thư mục ảnh", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad_section)
+        img_row = ctk.CTkFrame(scroll, fg_color="transparent")
+        img_row.pack(**pad)
+
+        self._detail_img_path = ctk.CTkEntry(
+            img_row, font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_img_path.pack(side="left", fill="x", expand=True, padx=(0, SIZES["padding_sm"]))
+        self._detail_img_path.insert(0, task.get("link_folder_anh", ""))
+
+        ctk.CTkButton(
+            img_row, text="📂", width=40, height=SIZES["button_height"],
+            font=FONTS["body"],
+            fg_color=COLORS["bg_hover"], hover_color=COLORS["border"],
+            command=lambda: self._pick_image_folder(),
+        ).pack(side="right")
+
+        # Image thumbnail grid
+        self._img_grid_frame = ctk.CTkFrame(scroll, fg_color="transparent")
+        self._img_grid_frame.pack(**pad)
+        self._render_image_grid(task.get("link_folder_anh", ""))
+
+        # ── Video Settings ──
+        ctk.CTkLabel(scroll, text="Cài đặt video", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad_section)
+
+        settings_grid = ctk.CTkFrame(scroll, fg_color="transparent")
+        settings_grid.pack(**pad)
+        settings_grid.columnconfigure((0, 1), weight=1)
+
+        # Model
+        self._build_setting_cell(settings_grid, 0, 0, "Model")
+        self._detail_model = ctk.CTkOptionMenu(
+            settings_grid, values=["Veo 3.1 - Fast", "Veo 3.1", "Veo 2.0"],
+            font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], button_color=COLORS["bg_hover"],
+            button_hover_color=COLORS["border"],
+            dropdown_fg_color=COLORS["bg_card"], dropdown_hover_color=COLORS["bg_hover"],
+        )
+        self._detail_model.grid(row=1, column=0, sticky="ew", padx=(0, SIZES["padding_sm"]), pady=(0, 4))
+        self._detail_model.set(fs.get("model", "Veo 3.1 - Fast"))
+
+        # Ratio
+        self._build_setting_cell(settings_grid, 0, 1, "Tỷ lệ")
+        ratio_map = {"PORTRAIT": "9:16", "LANDSCAPE": "16:9"}
+        ratio_reverse = {"9:16": "PORTRAIT", "16:9": "LANDSCAPE"}
+        self._ratio_reverse = ratio_reverse
+        current_ratio = ratio_map.get(fs.get("ratio", "PORTRAIT"), "9:16")
+        self._detail_ratio = ctk.CTkSegmentedButton(
+            settings_grid, values=["9:16", "16:9"],
+            font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"],
+            selected_color=COLORS["accent"], selected_hover_color=COLORS["accent_hover"],
+            unselected_color=COLORS["bg_input"], unselected_hover_color=COLORS["bg_hover"],
+        )
+        self._detail_ratio.grid(row=1, column=1, sticky="ew", pady=(0, 4))
+        self._detail_ratio.set(current_ratio)
+
+        # Quality
+        self._build_setting_cell(settings_grid, 2, 0, "Chất lượng")
+        self._detail_quality = ctk.CTkOptionMenu(
+            settings_grid, values=["720p", "1080p"],
+            font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], button_color=COLORS["bg_hover"],
+            button_hover_color=COLORS["border"],
+            dropdown_fg_color=COLORS["bg_card"], dropdown_hover_color=COLORS["bg_hover"],
+        )
+        self._detail_quality.grid(row=3, column=0, sticky="ew", padx=(0, SIZES["padding_sm"]), pady=(0, 4))
+        self._detail_quality.set(fs.get("download_quality", "720p"))
+
+        # Count
+        self._build_setting_cell(settings_grid, 2, 1, "Số lượng video")
+        count_str = str(fs.get("count", 2))
+        self._detail_count = ctk.CTkSegmentedButton(
+            settings_grid, values=["1", "2", "3", "4"],
+            font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"],
+            selected_color=COLORS["accent"], selected_hover_color=COLORS["accent_hover"],
+            unselected_color=COLORS["bg_input"], unselected_hover_color=COLORS["bg_hover"],
+        )
+        self._detail_count.grid(row=3, column=1, sticky="ew", pady=(0, 4))
+        self._detail_count.set(count_str)
+
+        # Download method
+        self._build_setting_cell(settings_grid, 4, 0, "Phương thức tải")
+        self._detail_dl_method = ctk.CTkSegmentedButton(
+            settings_grid, values=["zip", "individual"],
+            font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"],
+            selected_color=COLORS["accent"], selected_hover_color=COLORS["accent_hover"],
+            unselected_color=COLORS["bg_input"], unselected_hover_color=COLORS["bg_hover"],
+        )
+        self._detail_dl_method.grid(row=5, column=0, sticky="ew", padx=(0, SIZES["padding_sm"]), pady=(0, 4))
+        self._detail_dl_method.set(fs.get("download_method", "zip"))
+
+        # Style
+        self._build_setting_cell(settings_grid, 4, 1, "Style")
+        self._detail_style = ctk.CTkEntry(
+            settings_grid, font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_style.grid(row=5, column=1, sticky="ew", pady=(0, 4))
+        self._detail_style.insert(0, task.get("style", "cinematic"))
+
+        # ── Output Folder ──
+        ctk.CTkLabel(scroll, text="Thư mục output", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad_section)
+        out_row = ctk.CTkFrame(scroll, fg_color="transparent")
+        out_row.pack(**pad)
+
+        self._detail_output = ctk.CTkEntry(
+            out_row, font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_output.pack(side="left", fill="x", expand=True, padx=(0, SIZES["padding_sm"]))
+        self._detail_output.insert(0, task.get("link_folder_video", ""))
+
+        ctk.CTkButton(
+            out_row, text="📂", width=40, height=SIZES["button_height"],
+            font=FONTS["body"],
+            fg_color=COLORS["bg_hover"], hover_color=COLORS["border"],
+            command=lambda: self._pick_output_folder(),
+        ).pack(side="right")
+
+        # ── Channel ──
+        ctk.CTkLabel(scroll, text="Kênh đăng", font=FONTS["subheading"], text_color=COLORS["text_secondary"]).pack(**pad_section)
+        self._detail_channel = ctk.CTkEntry(
+            scroll, font=FONTS["body"], height=SIZES["button_height"],
+            fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
+            border_color=COLORS["border"], border_width=1,
+        )
+        self._detail_channel.pack(**pad)
+        self._detail_channel.insert(0, task.get("kenh_dang", ""))
+
+        # ── Save Button ──
+        ctk.CTkButton(
+            scroll, text="💾 Lưu thay đổi", font=FONTS["heading"],
+            height=42,
+            fg_color=COLORS["success"], hover_color="#2ea043",
+            command=lambda idx=index: self._save_current_detail(idx),
+        ).pack(fill="x", pady=(SIZES["padding"], 0))
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    #  DETAIL FORM HELPERS
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    def _build_setting_cell(self, parent, row, col, label_text):
+        ctk.CTkLabel(
+            parent, text=label_text, font=FONTS["small"],
+            text_color=COLORS["text_muted"],
+        ).grid(row=row, column=col, sticky="w", padx=(0, SIZES["padding_sm"] if col == 0 else 0), pady=(4, 0))
+
+    def _pick_image_folder(self):
+        path = filedialog.askdirectory(title="Chọn thư mục ảnh")
+        if path:
+            self._detail_img_path.delete(0, "end")
+            self._detail_img_path.insert(0, path)
+            self._render_image_grid(path)
+
+    def _pick_output_folder(self):
+        path = filedialog.askdirectory(title="Chọn thư mục output")
+        if path:
+            self._detail_output.delete(0, "end")
+            self._detail_output.insert(0, path)
+
+    def _render_image_grid(self, folder_path):
+        for widget in self._img_grid_frame.winfo_children():
+            widget.destroy()
+
+        if not folder_path or not Path(folder_path).is_dir():
+            ctk.CTkLabel(
+                self._img_grid_frame, text="📁 Chưa chọn thư mục ảnh",
+                font=FONTS["small"], text_color=COLORS["text_muted"],
+            ).pack(anchor="w")
+            return
+
+        image_exts = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
+        images = sorted([f for f in Path(folder_path).iterdir() if f.suffix.lower() in image_exts])[:8]
+
+        if not images:
+            ctk.CTkLabel(
+                self._img_grid_frame, text="⚠️ Không tìm thấy file ảnh trong thư mục",
+                font=FONTS["small"], text_color=COLORS["warning"],
+            ).pack(anchor="w")
+            return
 
         ctk.CTkLabel(
-            self.detail_frame,
-            text=f"📌 {name}",
-            font=FONTS["heading"], text_color=COLORS["text_primary"],
-        ).pack(padx=SIZES["padding"], pady=SIZES["padding"], anchor="w")
+            self._img_grid_frame, text=f"🖼 {len(images)} ảnh tìm thấy",
+            font=FONTS["small"], text_color=COLORS["text_muted"],
+        ).pack(anchor="w", pady=(0, 4))
 
-        ctk.CTkLabel(
-            self.detail_frame,
-            text="Form chi tiết sẽ được xây dựng ở Phase 4",
-            font=FONTS["body"], text_color=COLORS["text_muted"],
-        ).pack(padx=SIZES["padding"])
+        grid = ctk.CTkFrame(self._img_grid_frame, fg_color="transparent")
+        grid.pack(fill="x")
+
+        self._thumb_refs = []  # Keep references to prevent GC
+        for i, img_path in enumerate(images):
+            try:
+                pil_img = PILImage.open(img_path)
+                pil_img.thumbnail((80, 80))
+                ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(80, 80))
+                self._thumb_refs.append(ctk_img)
+
+                lbl = ctk.CTkLabel(grid, text="", image=ctk_img, width=84, height=84)
+                lbl.grid(row=i // 4, column=i % 4, padx=2, pady=2)
+            except Exception:
+                pass
+
+    def _save_current_detail(self, index):
+        """Collect form data and write back to JSON."""
+        task = self.tasks[index]
+
+        task["ten_san_pham"] = self._detail_name.get().strip()
+        task["mo_ta_san_pham"] = self._detail_desc.get("0.0", "end").strip()
+        task["prompt"] = self._detail_prompt.get("0.0", "end").strip()
+        task["link_folder_anh"] = self._detail_img_path.get().strip()
+        task["link_folder_video"] = self._detail_output.get().strip()
+        task["style"] = self._detail_style.get().strip()
+        task["kenh_dang"] = self._detail_channel.get().strip()
+
+        fs = task.setdefault("flow_settings", {})
+        fs["model"] = self._detail_model.get()
+        fs["ratio"] = self._ratio_reverse.get(self._detail_ratio.get(), "PORTRAIT")
+        fs["download_quality"] = self._detail_quality.get()
+        fs["count"] = int(self._detail_count.get())
+        fs["download_method"] = self._detail_dl_method.get()
+
+        self._save_tasks()
+        self._refresh_list()
+        messagebox.showinfo("Đã lưu", f"Đã lưu thay đổi cho \"{task['ten_san_pham']}\"")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #  PROJECT MANAGEMENT (Add / Clone / Delete)
