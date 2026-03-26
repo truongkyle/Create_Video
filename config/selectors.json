@@ -1,0 +1,77 @@
+{
+  "_comment": "Flow UI selectors (updated 2026-03-26). User-confirmed from live DOM inspection.",
+
+  "new_project": {
+    "btn_xpath": "//*[contains(text(), 'Dự án mới')]",
+    "btn_css": "button.jsIRVP.fXsrxE",
+    "description": "New project button on dashboard"
+  },
+
+  "upload_to_prompt": {
+    "plus_btn_css": "button.jQayrS",
+    "plus_btn_aria": "button[aria-haspopup='dialog']",
+    "upload_btn_text": "Tải hình ảnh lên",
+    "upload_icon_text": "upload",
+    "file_input": "input[type='file']",
+    "description": "Click '+' -> JS intercept -> 'Tải hình ảnh lên' -> send_keys to upload images to prompt"
+  },
+
+  "prompt": {
+    "contenteditable": "div.iTYalL.gVobbe",
+    "contenteditable_alt": "div[contenteditable='true']",
+    "placeholder_text": "Bạn muốn tạo gì?",
+    "description": "Prompt input - contenteditable div at bottom"
+  },
+
+  "settings": {
+    "trigger_css": "button.gLXNUV.ewQKQI.eaSocK.lfiHxo",
+    "trigger_icon": "arrow_drop_down",
+
+    "type": {
+      "IMAGE": { "aria_controls_contains": "IMAGE", "text": "Hình ảnh" },
+      "VIDEO": { "aria_controls_contains": "VIDEO", "text": "Video" }
+    },
+    "mode": {
+      "VIDEO_FRAMES": { "aria_controls_contains": "VIDEO_FRAMES", "text": "Khung hình" },
+      "VIDEO_REFERENCES": { "aria_controls_contains": "VIDEO_REFERENCES", "text": "Thành phần" }
+    },
+    "ratio": {
+      "PORTRAIT": { "aria_controls_contains": "PORTRAIT", "text": "9:16" },
+      "LANDSCAPE": { "aria_controls_contains": "LANDSCAPE", "text": "16:9" }
+    },
+    "count": {
+      "1": { "aria_controls_contains": "-1", "text": "x1" },
+      "2": { "aria_controls_contains": "-2", "text": "x2" },
+      "3": { "aria_controls_contains": "-3", "text": "x3" },
+      "4": { "aria_controls_contains": "-4", "text": "x4" }
+    },
+    "model_btn_css": "button.kSyLER",
+    "description": "Settings dropdown: type, mode, ratio, count, model. All use Radix tabs with aria-controls."
+  },
+
+  "generate": {
+    "btn_css": "button.gLXNUV.ewQKQI.eaSocK.lfiHxo",
+    "btn_text": "Tạo",
+    "description": "Generate button (arrow_forward + Tạo) at bottom right"
+  },
+
+  "render": {
+    "video_element": "video",
+    "description": "Render status - check for video element appearance"
+  },
+
+  "download": {
+    "btn_xpath": "//*[contains(text(), 'Tải') or contains(text(), 'Download')]",
+    "description": "Download button after render"
+  },
+
+  "retry": {
+    "btn_xpath": "//*[contains(text(), 'Thử lại') or contains(text(), 'Retry')]",
+    "description": "Retry button after render failure"
+  },
+
+  "login": {
+    "pro_badge": "button.kCHtet, button.haxeur",
+    "description": "PRO badge = logged in"
+  }
+}

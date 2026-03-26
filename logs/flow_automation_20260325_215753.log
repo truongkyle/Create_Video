@@ -1,0 +1,235 @@
+[2026-03-25 21:57:53] INFO     ============================================================
+[2026-03-25 21:57:53] INFO       Google Flow Video Automation — Starting
+[2026-03-25 21:57:53] INFO     ============================================================
+[2026-03-25 21:57:53] INFO     Loaded 1 tasks from D:\Automation\Create_Video\data\sample_input.json
+[2026-03-25 21:57:53] INFO     Found 1 pending tasks
+[2026-03-25 21:57:53] INFO     Processing 1 tasks
+[2026-03-25 21:58:08] INFO     Chrome driver created (headless=False)
+[2026-03-25 21:58:08] INFO     Loaded 3 cookies from D:\Automation\Create_Video\config\cookies.json
+[2026-03-25 21:58:12] WARNING  Failed to inject cookie __Host-next-auth.csrf-token: Message: unable to set cookie
+  (Session info: chrome=146.0.7680.153)
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x341f5e]
+	undetected_chromedriver!(No symbol) [0x34eb3c]
+	undetected_chromedriver!(No symbol) [0x3dc697]
+	undetected_chromedriver!(No symbol) [0x3adb0c]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 21:58:12] DEBUG    Injected cookie: __Secure-next-auth.callback-url
+[2026-03-25 21:58:12] DEBUG    Injected cookie: __Secure-next-auth.session-token
+[2026-03-25 21:58:12] INFO     All cookies injected
+[2026-03-25 21:58:22] INFO     Login validated: user is authenticated
+[2026-03-25 21:58:22] INFO     
+──────────────────────────────────────────────────
+[2026-03-25 21:58:22] INFO     📹 [1/1] Ví Nữ Ngắn Nắp Gập Imee Size 11
+[2026-03-25 21:58:22] INFO     ──────────────────────────────────────────────────
+[2026-03-25 21:58:22] INFO     Found 4 images in D:\Automation\Create_Video\data\image_source
+[2026-03-25 21:58:22] DEBUG    Download dir ready: D:\Automation\Create_Video\output
+[2026-03-25 21:58:22] DEBUG    Download dir set to: D:\Automation\Create_Video\output
+[2026-03-25 21:58:22] DEBUG    Saved 1 tasks to D:\Automation\Create_Video\data\sample_input.json
+[2026-03-25 21:58:22] INFO     Task 0 → status=processing
+[2026-03-25 21:58:22] INFO     ▶ Step: navigate (attempt 1/3)
+[2026-03-25 21:58:27] INFO     Navigated to https://labs.google/fx/tools/flow
+[2026-03-25 21:58:29] INFO     ▶ Step: select_ingredients_mode (attempt 1/3)
+[2026-03-25 21:58:40] WARNING  Step 'select_ingredients_mode' attempt 1 failed: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=146.0.7680.153); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x342120]
+	undetected_chromedriver!(No symbol) [0x348d51]
+	undetected_chromedriver!(No symbol) [0x34b02a]
+	undetected_chromedriver!(No symbol) [0x34b0b8]
+	undetected_chromedriver!(No symbol) [0x38a640]
+	undetected_chromedriver!(No symbol) [0x38ae6b]
+	undetected_chromedriver!(No symbol) [0x3cd0b2]
+	undetected_chromedriver!(No symbol) [0x3adb54]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 21:58:40] INFO     Waiting 2s before retry...
+[2026-03-25 21:58:42] INFO     ▶ Step: select_ingredients_mode (attempt 2/3)
+[2026-03-25 21:58:53] WARNING  Step 'select_ingredients_mode' attempt 2 failed: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=146.0.7680.153); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x342120]
+	undetected_chromedriver!(No symbol) [0x348d51]
+	undetected_chromedriver!(No symbol) [0x34b02a]
+	undetected_chromedriver!(No symbol) [0x34b0b8]
+	undetected_chromedriver!(No symbol) [0x38a640]
+	undetected_chromedriver!(No symbol) [0x38ae6b]
+	undetected_chromedriver!(No symbol) [0x3cd0b2]
+	undetected_chromedriver!(No symbol) [0x3adb54]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 21:58:53] INFO     Waiting 4s before retry...
+[2026-03-25 21:58:57] INFO     ▶ Step: select_ingredients_mode (attempt 3/3)
+[2026-03-25 21:59:07] WARNING  Step 'select_ingredients_mode' attempt 3 failed: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=146.0.7680.153); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x342120]
+	undetected_chromedriver!(No symbol) [0x348d51]
+	undetected_chromedriver!(No symbol) [0x34b02a]
+	undetected_chromedriver!(No symbol) [0x34b0b8]
+	undetected_chromedriver!(No symbol) [0x38a640]
+	undetected_chromedriver!(No symbol) [0x38ae6b]
+	undetected_chromedriver!(No symbol) [0x3cd0b2]
+	undetected_chromedriver!(No symbol) [0x3adb54]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 21:59:07] ERROR    Step-level retry exhausted: Step 'select_ingredients_mode' failed after 3 retries
+[2026-03-25 21:59:07] INFO     🔄 Reload retry 1/3
+[2026-03-25 21:59:15] INFO     ▶ Step 2/10: select_ingredients_mode
+[2026-03-25 21:59:26] ERROR    Reload retry 1 failed: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=146.0.7680.153); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x342120]
+	undetected_chromedriver!(No symbol) [0x348d51]
+	undetected_chromedriver!(No symbol) [0x34b02a]
+	undetected_chromedriver!(No symbol) [0x34b0b8]
+	undetected_chromedriver!(No symbol) [0x38a640]
+	undetected_chromedriver!(No symbol) [0x38ae6b]
+	undetected_chromedriver!(No symbol) [0x3cd0b2]
+	undetected_chromedriver!(No symbol) [0x3adb54]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 21:59:26] INFO     🔄 Reload retry 2/3
+[2026-03-25 21:59:32] INFO     ▶ Step 2/10: select_ingredients_mode
+[2026-03-25 21:59:43] ERROR    Reload retry 2 failed: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=146.0.7680.153); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x342120]
+	undetected_chromedriver!(No symbol) [0x348d51]
+	undetected_chromedriver!(No symbol) [0x34b02a]
+	undetected_chromedriver!(No symbol) [0x34b0b8]
+	undetected_chromedriver!(No symbol) [0x38a640]
+	undetected_chromedriver!(No symbol) [0x38ae6b]
+	undetected_chromedriver!(No symbol) [0x3cd0b2]
+	undetected_chromedriver!(No symbol) [0x3adb54]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 21:59:43] INFO     🔄 Reload retry 3/3
+[2026-03-25 21:59:50] INFO     ▶ Step 2/10: select_ingredients_mode
+[2026-03-25 22:00:01] ERROR    Reload retry 3 failed: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=146.0.7680.153); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+	undetected_chromedriver!GetHandleVerifier [0x55cdf3+10b03]
+	undetected_chromedriver!GetHandleVerifier [0x55cf24+10c34]
+	undetected_chromedriver!(No symbol) [0x342120]
+	undetected_chromedriver!(No symbol) [0x348d51]
+	undetected_chromedriver!(No symbol) [0x34b02a]
+	undetected_chromedriver!(No symbol) [0x34b0b8]
+	undetected_chromedriver!(No symbol) [0x38a640]
+	undetected_chromedriver!(No symbol) [0x38ae6b]
+	undetected_chromedriver!(No symbol) [0x3cd0b2]
+	undetected_chromedriver!(No symbol) [0x3adb54]
+	undetected_chromedriver!(No symbol) [0x3ca9a5]
+	undetected_chromedriver!(No symbol) [0x3ad8a6]
+	undetected_chromedriver!(No symbol) [0x380229]
+	undetected_chromedriver!(No symbol) [0x380fe4]
+	undetected_chromedriver!GetHandleVerifier [0x7c48b9+2785c9]
+	undetected_chromedriver!GetHandleVerifier [0x7bfeb5+273bc5]
+	undetected_chromedriver!GetHandleVerifier [0x7de06b+291d7b]
+	undetected_chromedriver!GetHandleVerifier [0x575cc8+299d8]
+	undetected_chromedriver!GetHandleVerifier [0x57d9fd+3170d]
+	undetected_chromedriver!GetHandleVerifier [0x5658c8+195d8]
+	undetected_chromedriver!GetHandleVerifier [0x565a92+197a2]
+	undetected_chromedriver!GetHandleVerifier [0x54ee9a+2baa]
+	KERNEL32!BaseThreadInitThunk [0x767d5d49+19]
+	ntdll!RtlInitializeExceptionChain [0x77c2d81b+6b]
+	ntdll!RtlGetAppContainerNamedObjectPath [0x77c2d7a1+231]
+
+[2026-03-25 22:00:01] INFO     🔁 Full restart 1/1

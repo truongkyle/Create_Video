@@ -1,0 +1,29 @@
+[
+  {
+    "ten_san_pham": "Ví Nữ Ngắn Nắp Gập Imee Size 11",
+    "mo_ta_san_pham": "Chất liệu: Da PU cao cấp\n\nKích thước: 11 x 3 x 9 cm",
+    "link_folder_anh": "D:\\Automation\\Create_Video\\data\\image_source",
+    "prompt": "Create a cinematic product showcase video for a women's wallet. Show the fabric texture, highlight the slim-fit design. Use smooth camera movements and warm lighting. Professional fashion photography style.",
+    "style": "cinematic",
+    "link_folder_video": "D:\\Automation\\Create_Video\\output",
+    "kenh_dang": "TikTok",
+
+    "flow_settings": {
+      "type": "VIDEO",
+      "mode": "VIDEO_REFERENCES",
+      "ratio": "PORTRAIT",
+      "count": 2,
+      "model": "Veo 3.1 - Fast"
+    },
+
+    "status": "pending",
+    "timestamp": "2026-03-25 21:58:22",
+    "error": null,
+    "video_path": null,
+    "_images": [
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-17_e4a70f819b474f15b9eaff98df4e5bb9_master.jpg",
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-2_ec13c9fc73c94adbab8ddb3461c81ad8_master.jpg",
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-3_c55433c112b54461bf12fefa64b5a88e_master.jpg"
+    ]
+  }
+]

@@ -1,0 +1,446 @@
+{
+  "_summary": {
+    "page_title": "Flow",
+    "page_url": "https://labs.google/fx/vi/tools/flow",
+    "total_buttons": 11,
+    "total_clickable": 2,
+    "total_contenteditable": 0,
+    "total_dropdowns": 0,
+    "total_file_inputs": 0,
+    "total_inputs": 0,
+    "total_links": 7,
+    "total_textareas": 1
+  },
+  "buttons": [
+    {
+      "aria-label": "Điều chỉnh âm lượng",
+      "class": "sc-44940ac7-0 fojSnp sc-b89157ad-6 hjLFBe",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 24,
+        "w": 24,
+        "x": 1081,
+        "y": 28
+      },
+      "role": null,
+      "selector": "[aria-label=\"Điều chỉnh âm lượng\"]",
+      "tag": "button",
+      "text": "volume_up",
+      "type": "button",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-b89157ad-11 ftNLtq",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 24,
+        "w": 24,
+        "x": 1219,
+        "y": 28
+      },
+      "role": null,
+      "selector": "button.sc-e8425ea6-0.gLXNUV.sc-b89157ad-11.ftNLtq",
+      "tag": "button",
+      "text": "help_outlinedTrung tâm trợ giúp về FlowTrung tâm trợ giúp về Flow",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-b89157ad-8 kCHtet",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 48,
+        "w": 99,
+        "x": 1319,
+        "y": 16
+      },
+      "role": null,
+      "selector": "button.sc-b89157ad-8.kCHtet",
+      "tag": "button",
+      "text": "PRO",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-531cc04c-10 losGwp",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 47,
+        "w": 40,
+        "x": 1370,
+        "y": 88
+      },
+      "role": null,
+      "selector": "button.sc-531cc04c-10.losGwp",
+      "tag": "button",
+      "text": "close",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-f9321097-0 lkZgGg sc-6f1ffe7a-7 cCgYDC",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 40,
+        "w": 40,
+        "x": 174,
+        "y": 739
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(1) > div > span > button",
+      "tag": "button",
+      "text": "editChỉnh sửa dự án",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-f9321097-0 lkZgGg sc-6f1ffe7a-6 eMeNfn",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 40,
+        "w": 40,
+        "x": 434,
+        "y": 739
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(1) > div > button",
+      "tag": "button",
+      "text": "deleteXoá dự án",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-f9321097-0 lkZgGg sc-6f1ffe7a-7 cCgYDC",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 40,
+        "w": 40,
+        "x": 644,
+        "y": 739
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > span > button",
+      "tag": "button",
+      "text": "editChỉnh sửa dự án",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-f9321097-0 lkZgGg sc-6f1ffe7a-6 eMeNfn",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 40,
+        "w": 40,
+        "x": 904,
+        "y": 739
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > button",
+      "tag": "button",
+      "text": "deleteXoá dự án",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-f9321097-0 lkZgGg sc-6f1ffe7a-7 cCgYDC",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 40,
+        "w": 40,
+        "x": 1089,
+        "y": 739
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(3) > div > span > button",
+      "tag": "button",
+      "text": "editChỉnh sửa dự án",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-e8425ea6-0 gLXNUV sc-f9321097-0 lkZgGg sc-6f1ffe7a-6 eMeNfn",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 40,
+        "w": 40,
+        "x": 1374,
+        "y": 739
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(3) > div > button",
+      "tag": "button",
+      "text": "deleteXoá dự án",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-16c4830a-1 jsIRVP sc-a38764c7-0 fXsrxE",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 128,
+        "w": 192,
+        "x": 625,
+        "y": 698
+      },
+      "role": null,
+      "selector": "button.sc-16c4830a-1.jsIRVP.sc-a38764c7-0.fXsrxE",
+      "tag": "button",
+      "text": "add_2Dự án mới",
+      "type": "submit",
+      "visible": true
+    }
+  ],
+  "clickable": [
+    {
+      "aria-label": null,
+      "class": "sc-f5232288-1 glLSzG",
+      "data-testid": "virtuoso-scroller",
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 882,
+        "w": 1442,
+        "x": 0,
+        "y": 0
+      },
+      "role": null,
+      "selector": "[data-testid=\"virtuoso-scroller\"]",
+      "tag": "div",
+      "text": "Nano Banana 2 is Here!We've updated the original Nano Banana model, with significant improvements in",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": null,
+      "data-testid": "virtuoso-item-list",
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 319,
+        "w": 1434,
+        "x": 0,
+        "y": 480
+      },
+      "role": null,
+      "selector": "[data-testid=\"virtuoso-item-list\"]",
+      "tag": "div",
+      "text": "Mar 26, 09:14 AMeditChỉnh sửa dự ándeleteXoá dự ánMar 26, 09:14 AMeditChỉnh sửa dự ándeleteXoá dự án",
+      "type": null,
+      "visible": true
+    }
+  ],
+  "contenteditable": [],
+  "dropdowns": [],
+  "file_inputs": [],
+  "inputs": [],
+  "links": [
+    {
+      "aria-label": null,
+      "class": "sc-afabda59-8 jPegrD",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 24,
+        "w": 35,
+        "x": 24,
+        "y": 28
+      },
+      "role": null,
+      "selector": "a.sc-afabda59-8.jPegrD",
+      "tag": "a",
+      "text": "Flow",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-91b74dd7-0 hwNurC sc-b89157ad-5 kDiAfr",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 42,
+        "w": 129,
+        "x": 928,
+        "y": 19
+      },
+      "role": null,
+      "selector": "a.sc-91b74dd7-0.hwNurC.sc-b89157ad-5.kDiAfr",
+      "tag": "a",
+      "text": "tvFlow TV",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-b89157ad-12 ibJpzH",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 24,
+        "w": 24,
+        "x": 1129,
+        "y": 28
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(1) > div > a:nth-of-type(2)",
+      "tag": "a",
+      "text": "",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": "sc-b89157ad-12 ibJpzH",
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 18,
+        "w": 18,
+        "x": 1177,
+        "y": 31
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(1) > div > a:nth-of-type(3)",
+      "tag": "a",
+      "text": "",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": null,
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 255,
+        "w": 454,
+        "x": 24,
+        "y": 480
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(1) > a",
+      "tag": "a",
+      "text": "",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": null,
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 255,
+        "w": 454,
+        "x": 494,
+        "y": 480
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > a",
+      "tag": "a",
+      "text": "",
+      "type": null,
+      "visible": true
+    },
+    {
+      "aria-label": null,
+      "class": null,
+      "data-testid": null,
+      "id": null,
+      "name": null,
+      "placeholder": null,
+      "position": {
+        "h": 255,
+        "w": 454,
+        "x": 964,
+        "y": 480
+      },
+      "role": null,
+      "selector": "#__next > div:nth-of-type(2) > div > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(2) > div > div > div:nth-of-type(3) > a",
+      "tag": "a",
+      "text": "",
+      "type": null,
+      "visible": true
+    }
+  ],
+  "textareas": [
+    {
+      "aria-label": null,
+      "class": "g-recaptcha-response",
+      "data-testid": null,
+      "id": "g-recaptcha-response-100000",
+      "name": "g-recaptcha-response",
+      "placeholder": null,
+      "position": {
+        "h": 0,
+        "w": 0,
+        "x": 0,
+        "y": 0
+      },
+      "role": null,
+      "selector": "#g-recaptcha-response-100000",
+      "tag": "textarea",
+      "text": "",
+      "type": "textarea",
+      "visible": false
+    }
+  ]
+}
