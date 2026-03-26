@@ -31,6 +31,7 @@ class VideoAutomationApp(ctk.CTk):
         self._create_tabs()
         self._create_panels()
         self._connect_signals()
+        self._bind_shortcuts()
 
     def _configure_window(self):
         self.title("Video Automation — Google Flow")
@@ -190,6 +191,33 @@ class VideoAutomationApp(ctk.CTk):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #  WINDOW
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    def _bind_shortcuts(self):
+        """Global keyboard shortcuts."""
+        self.bind("<Control-s>", lambda e: self._shortcut_save())
+        self.bind("<F5>", lambda e: self._shortcut_refresh())
+        self.bind("<Control-r>", lambda e: self._run_all_tasks())
+        self.bind("<Escape>", lambda e: self._shortcut_stop())
+
+    def _shortcut_save(self):
+        """Ctrl+S: Save current project if on the Tạo Video tab."""
+        if self.tabview.get() == "📹 Tạo Video":
+            panel = self.project_panel
+            if panel.selected_index is not None:
+                panel._save_current_detail(panel.selected_index)
+
+    def _shortcut_refresh(self):
+        """F5: Refresh project list and render queue."""
+        self.project_panel._load_tasks()
+        if self.tabview.get() == "📊 Tiến trình" and not self.api.is_running:
+            self.progress_panel.refresh_queue(self.project_panel.tasks)
+        self.set_status("🔄 Đã refresh", COLORS["accent"])
+        self.after(2000, lambda: self.set_status("⚪ Sẵn sàng"))
+
+    def _shortcut_stop(self):
+        """Escape: Stop pipeline if running."""
+        if self.api.is_running:
+            self._stop_pipeline()
 
     def set_status(self, text, color=None):
         self.status_label.configure(text=text, text_color=color or COLORS["text_secondary"])

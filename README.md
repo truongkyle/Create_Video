@@ -18,6 +18,57 @@ Dự án tự động hóa quá trình tạo và tải video từ [Google Flow (
   1. **ZIP Project Export (`zip`):** Tải toàn bộ dự án dưới dạng 1 file ZIP chặn đứng thất bại mạng, sau đó tự động giải nén ra các file `.mp4` / `.webm` và xóa file rác (Nhanh và ổn định nhất).
   2. **Tải Từng Video (`individual`):** Click vào từng tile video riêng lẻ, chọn mức phân giải và tải xuống native.
 - 📋 **Trình Quản Lý Luồng Công Việc (`main.py`):** Lần lượt duyệt qua các luồng task (`pending` -> `processing` -> `completed` / `failed`), tự động đóng/mở trình duyệt mới sau mỗi lần để giải phóng RAM.
+- 🖥️ **Giao Diện Desktop (GUI):** Quản lý toàn bộ pipeline qua giao diện đồ họa chuyên nghiệp, không cần chỉnh sửa file JSON thủ công.
+
+---
+
+## 🖥️ Giao Diện Desktop (GUI)
+
+Hệ thống có giao diện desktop chuyên nghiệp được xây dựng bằng **CustomTkinter**, cho phép quản lý toàn bộ quy trình automation mà không cần chỉnh sửa file JSON hay chạy lệnh command line.
+
+### Khởi chạy GUI
+
+```powershell
+# Kích hoạt môi trường ảo
+.\venv\Scripts\activate
+
+# Chạy GUI
+python run_gui.py
+```
+
+### 3 Tab Chính
+
+#### ⚙️ Tab "Cấu hình"
+- **JSON Editor:** Chọn file và chỉnh sửa trực tiếp `data/sample_input.json`.
+- **Cookie Manager:** Import cookies từ file hoặc paste text. Tự động validate cấu trúc JSON.
+- **Settings Editor:** Chỉnh sửa biến môi trường `.env` (timeouts, retries, delays) qua form trực quan.
+
+#### 📹 Tab "Tạo Video"
+- **Sidebar dự án:** Danh sách tất cả dự án với icon trạng thái (🟡 pending, ✅ done, ❌ failed).
+- **Form chỉnh sửa chi tiết:** Product Name, Prompt, Image Folder (có preview thumbnail), Video settings (model, ratio, quality, count), Output folder, Channel.
+- **Quản lý dự án:** Thêm mới (`+ Thêm`), Clone (`📋 Clone`), Xóa đơn/hàng loạt (`🗑 Xóa`).
+- **Validation:** Cảnh báo nếu thiếu tên sản phẩm, prompt, hoặc thư mục ảnh khi lưu.
+
+#### 📊 Tab "Tiến trình" (Render Queue)
+- **Render Queue:** Hiển thị **toàn bộ** danh sách dự án với checkbox, icon trạng thái, và tiến trình step hiện tại.
+- **Trạng thái task:**
+  - ⏳ **Pending** — chưa chạy
+  - 🔵 **Running** — đang chạy (hiện `3/8 upload`)
+  - ✅ **Completed** — hoàn tất (hiện `+2 video`)
+  - ❌ **Failed** — lỗi
+  - ⏭ **Skipped** — bỏ qua
+- **Pipeline Step Indicator:** 8 bước hiển thị trực quan: Navigate → Create → Upload → Prompt → Settings → Generate → Render → Download.
+- **Log Viewer:** Real-time log với timestamp, auto-scroll.
+- **Action Bar:** Chế độ Tuần tự/Song song (1-4 workers), nút Chạy tất cả/Chạy đã chọn/Dừng.
+
+### ⌨️ Phím tắt
+
+| Phím tắt | Chức năng |
+|----------|-----------|
+| `Ctrl+S` | Lưu dự án đang chỉnh sửa (tab Tạo Video) |
+| `F5` | Refresh danh sách dự án & render queue |
+| `Ctrl+R` | Chạy tất cả task pending |
+| `Escape` | Dừng pipeline đang chạy |
 
 ---
 
@@ -61,18 +112,29 @@ pip install -r requirements.txt
 ```
 Create_Video/
 ├── config/
-│   ├── cookies.json       # (Tạo thủ công hoặc qua script) Chứa mảng JSON cookies từ file xuất extention
-│   └── selectors.json     # Chứa các bộ chọn XPATH, CSS, Text phục vụ việc bấm nút UI
+│   ├── .env               # Biến môi trường (timeouts, retries, delays)
+│   ├── cookies.json       # Cookies từ extension EditThisCookie
+│   └── selectors.json     # XPATH, CSS, Text selectors cho UI
 ├── data/
-│   └── sample_input.json  # File cấu hình luồng quay vòng các videos cần tạo
+│   └── sample_input.json  # Cấu hình các task video cần tạo
+├── gui/
+│   ├── app.py             # Main GUI entry point (kết nối mọi thứ)
+│   ├── theme.py           # Design tokens: colors, fonts, sizes
+│   └── panels/
+│       ├── config_panel.py    # Tab Cấu hình
+│       ├── project_panel.py   # Tab Tạo Video
+│       └── progress_panel.py  # Tab Tiến trình (Render Queue)
 ├── src/
-│   ├── browser_controller.py # Các hàm quản lý trình duyệt, click, delay
-│   ├── cookie_manager.py     # Nạp/xuất cookie, kiểm tra login session
-│   ├── flow_automator.py     # LỚP CỐT LÕI - Thực thi các bước từ upload đến cấu hình, tải về
+│   ├── automation_api.py     # Bridge giữa GUI và engine
+│   ├── browser_controller.py # Quản lý trình duyệt, click, delay
+│   ├── cookie_manager.py     # Nạp/xuất cookie, validate, import text
+│   ├── flow_automator.py     # LỚP CỐT LÕI - Pipeline automation
 │   ├── json_handler.py       # Đọc ghi trạng thái JSON
-│   └── test_steps.py         # Chạy trực tiếp 1 task để debug các bước đơn lẻ
-├── output/                # Thư mục đích dể hứng các file video (tự động tạo)
-├── main.py                # Điểm khởi chạy hệ thống theo vòng lặp các tasks
+│   ├── retry_engine.py       # Retry logic cho render failures
+│   └── test_steps.py         # Debug chạy 1 task đơn lẻ
+├── output/                # Thư mục hứng video (tự động tạo)
+├── main.py                # CLI entry point (chạy không cần GUI)
+├── run_gui.py             # GUI entry point
 └── README.md
 ```
 
@@ -95,13 +157,9 @@ Mọi thông số của mỗi video được lưu tại `data/sample_input.json`
       "count": 2,
       "model": "Veo 3.1 - Fast",
       "download_quality": "720p",
-      "download_method": "zip"  // [ "zip" hoặc "individual" ]
+      "download_method": "zip"
     },
-    "status": "pending", // Sau khi chạy xong sẽ chuyển thành "completed"
-    "_images": [
-      "D:\\Automation\\Create_Video\\data\\image_source\\img1.jpg",
-      "D:\\Automation\\Create_Video\\data\\image_source\\img2.jpg"
-    ]
+    "status": "pending"
   }
 ]
 ```
@@ -120,23 +178,29 @@ Mọi thông số của mỗi video được lưu tại `data/sample_input.json`
 
 ## 👟 Cách thức hoạt động và khởi chạy
 
-### Bước 1: Mở khóa Cookie
-Copy chuỗi JSON xuất từ extention EditThisCookie (hoặc tương tự) trên trình duyệt chính chủ trong thư mục tài khoản Google của bạn, dán vào file `config/cookies.json` để hệ thống không bị dính vòng lặp xác minh Google Đăng nhập lần tới.
+### Cách 1: Chạy qua GUI (Khuyên dùng)
 
-### Bước 2: Khởi chạy Pipeline
-*(Lưu ý: Chắc chắn rằng bạn đã kích hoạt môi trường ảo - Terminal sẽ hiện chữ `(venv)` ở đầu)*
+```powershell
+.\venv\Scripts\activate
+python run_gui.py
+```
 
-- **Chạy thực tế ở chế độ Prod:** 
-  Hệ thống sẽ duyệt các task "pending", xử lý, báo thành công ("completed"):
-  ```bash
-  python main.py
-  ```
+1. Mở tab **⚙️ Cấu hình** → Import cookies
+2. Mở tab **📹 Tạo Video** → Tạo/chỉnh sửa dự án
+3. Mở tab **📊 Tiến trình** → Chọn chế độ chạy → Bấm **▶ Chạy tất cả**
+4. Theo dõi tiến trình real-time trên log viewer và pipeline indicator
 
-- **Chạy test luồng (Không lưu trạng thái json):**
-  Rất tiện khi bạn đang tinh chỉnh XPath, UI selector:
-  ```bash
-  python src/test_steps.py
-  ```
+### Cách 2: Chạy qua CLI (Command Line)
+
+```powershell
+.\venv\Scripts\activate
+
+# Chạy tất cả task pending
+python main.py
+
+# Debug 1 task
+python src/test_steps.py
+```
 
 ### Các sự kiện diễn ra tự động bên dưới:
 1. Mở cửa sổ ẩn/hiện ChromeDriver, nhồi cookie, bypass checking
@@ -159,3 +223,6 @@ Copy chuỗi JSON xuất từ extention EditThisCookie (hoặc tương tự) tr�
 
 3. Lỗi tải ZIP timeout
 > *Đảm bảo đường dẫn tải xuống mặc định (`Downloads`) của bạn không bị ghi đè, hệ thống timeout trong 200s trước khi báo lỗi không nhận được file ZIP.*
+
+4. GUI không mở được
+> *Đảm bảo đã cài `customtkinter` và `Pillow`: `pip install -r requirements.txt`*

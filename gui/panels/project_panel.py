@@ -473,13 +473,31 @@ class ProjectPanel(ctk.CTkFrame):
                 pass
 
     def _save_current_detail(self, index):
-        """Collect form data and write back to JSON."""
-        task = self.tasks[index]
+        """Validate form data, then write back to JSON."""
+        name = self._detail_name.get().strip()
+        prompt = self._detail_prompt.get("0.0", "end").strip()
+        img_path = self._detail_img_path.get().strip()
 
-        task["ten_san_pham"] = self._detail_name.get().strip()
+        # Validation
+        errors = []
+        if not name:
+            errors.append("• Tên sản phẩm không được để trống")
+        if not prompt:
+            errors.append("• Prompt không được để trống")
+        if not img_path:
+            errors.append("• Chưa chọn thư mục ảnh")
+        elif not Path(img_path).is_dir():
+            errors.append(f"• Thư mục ảnh không tồn tại:\n  {img_path}")
+
+        if errors:
+            messagebox.showwarning("Thiếu thông tin", "\n".join(errors))
+            return
+
+        task = self.tasks[index]
+        task["ten_san_pham"] = name
         task["mo_ta_san_pham"] = self._detail_desc.get("0.0", "end").strip()
-        task["prompt"] = self._detail_prompt.get("0.0", "end").strip()
-        task["link_folder_anh"] = self._detail_img_path.get().strip()
+        task["prompt"] = prompt
+        task["link_folder_anh"] = img_path
         task["link_folder_video"] = self._detail_output.get().strip()
         task["style"] = self._detail_style.get().strip()
         task["kenh_dang"] = self._detail_channel.get().strip()
