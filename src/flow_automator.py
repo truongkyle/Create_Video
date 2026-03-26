@@ -149,7 +149,7 @@ class FlowAutomator:
         logger.info("Clicked '+' — dialog opened")
 
         # 2. Intercept file input click to prevent native Windows dialog
-        file_input = safe_find(self.driver, "input[type='file']", timeout=5)
+        file_input = safe_find(self.driver, "input[type='file']", timeout=15)
         if not file_input:
             raise RuntimeError("Cannot find file input")
 
@@ -332,39 +332,57 @@ class FlowAutomator:
 
     # --- Step 7: Wait for render ---
     def step_wait_render(self, task):
+        from selenium.webdriver.common.by import By
         start = time.time()
         check_interval = 10
         last_log = 0
+        retry_count = 0
+        MAX_RETRIES = 3
 
         while time.time() - start < RENDER_TIMEOUT:
             elapsed = int(time.time() - start)
-
-            video_el = safe_find(self.driver, "video", timeout=3)
-            if video_el:
-                logger.info(f"Render done in {elapsed}s")
+            
+            # 1. Check if ANY retries are needed
+            retry_btns = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Thử lại') or contains(text(), 'Retry')]")
+            visible_retries = [b for b in retry_btns if b.is_displayed()]
+            
+            if visible_retries:
+                if retry_count < MAX_RETRIES:
+                    retry_count += 1
+                    logger.warning(f"Found {len(visible_retries)} failed tiles. Clicking Retry (Attempt {retry_count}/{MAX_RETRIES})")
+                    for btn in visible_retries:
+                        try:
+                            human_click(self.driver, btn)
+                            time.sleep(1)
+                        except Exception:
+                            pass
+                    # Reset the timeout clock slightly to give retries a chance
+                    start = time.time() - (RENDER_TIMEOUT // 2) 
+                    continue
+                else:
+                    logger.error("Max retries reached for failed tiles. Proceeding with any successful ones.")
+                    break # Stop polling and move to download whatever succeeded
+            
+            # 2. Check if loading spinners / progress indicators still exist
+            # Often Google Flow has "Đang tạo..." or generating states
+            loading_indicators = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Đang tạo') or contains(text(), 'Generating')]")
+            if any(l.is_displayed() for l in loading_indicators):
+                if elapsed - last_log >= 30:
+                    logger.info(f"Rendering... {elapsed}s")
+                    last_log = elapsed
+                time.sleep(check_interval)
+                continue
+                
+            # 3. Check for successful videos
+            video_els = self.driver.find_elements(By.CSS_SELECTOR, "video")
+            if len(video_els) > 0 and len(visible_retries) == 0:
+                logger.info(f"Render done in {elapsed}s. Found {len(video_els)} successful video(s).")
                 human_delay(2, 3)
                 return
-
-            dl_btn = find_by_text(self.driver, "*", "Download", timeout=2)
-            if not dl_btn:
-                dl_btn = find_by_text(self.driver, "*", "Tải", timeout=2)
-            if dl_btn:
-                logger.info(f"Render done in {elapsed}s (download ready)")
-                return
-
-            retry_btn = find_by_text(self.driver, "*", "Thử lại", timeout=1)
-            if not retry_btn:
-                retry_btn = find_by_text(self.driver, "*", "Retry", timeout=1)
-            if retry_btn:
-                raise RuntimeError("Render failed — retry needed")
-
-            if elapsed - last_log >= 30:
-                logger.info(f"Rendering... {elapsed}s")
-                last_log = elapsed
-
+                
             time.sleep(check_interval)
 
-        raise TimeoutException(f"Render timeout after {RENDER_TIMEOUT}s")
+        logger.info("Render polling complete (either success, timeout, or max retries)")
 
     # --- Step 8: Download ---
     def step_download(self, task):
@@ -373,24 +391,86 @@ class FlowAutomator:
             Path(download_folder).mkdir(parents=True, exist_ok=True)
             set_download_dir(self.driver, download_folder)
 
-        clicked = click_by_text(self.driver, "button", "Download", timeout=10)
-        if not clicked:
-            clicked = click_by_text(self.driver, "button", "Tải về", timeout=5)
-        if not clicked:
-            clicked = click_by_text(self.driver, "*", "Download", timeout=5)
-
-        if not clicked:
-            video_el = safe_find(self.driver, "video", timeout=5)
-            if video_el:
-                src = video_el.get_attribute("src")
-                if src:
-                    logger.info(f"Video URL: {src[:80]}...")
-                    self.driver.execute_script(f"window.open('{src}', '_blank');")
-                    human_delay(3, 5)
-                    clicked = True
-
-        if clicked:
-            logger.info("Download initiated")
-            human_delay(5, 10)
+        # Method 3: Native Detail View Download (User requested flow)
+        # Find all <a> tags that contain a <video> element
+        from selenium.webdriver.common.by import By
+        
+        def get_tiles():
+            t = self.driver.find_elements(By.XPATH, "//a[.//video]")
+            if not t:
+                t = self.driver.find_elements(By.CSS_SELECTOR, "video")
+            return t
+            
+        initial_tiles = get_tiles()
+        tiles_count = len(initial_tiles)
+            
+        logger.info(f"Found {tiles_count} video tile(s) ready for download")
+        
+        success_count = 0
+        for idx in range(tiles_count):
+            try:
+                # Re-fetch tiles on every loop to avoid StaleElementReferenceException
+                # after Google Flow's React SPA navigates back and destroys old DOM nodes.
+                fresh_tiles = get_tiles()
+                if idx >= len(fresh_tiles):
+                    logger.warning(f"  -> Tile {idx+1} disappeared from DOM. Skipping.")
+                    continue
+                    
+                tile = fresh_tiles[idx]
+                
+                # 1. Click into the video detail view
+                logger.info(f"Processing Video {idx+1}/{tiles_count}")
+                human_click(self.driver, tile)
+                human_delay(2, 4)
+                
+                # 2. Click the Native Download button
+                # The user noted it might have text "Tải xuống" or an icon with "download"
+                download_btn = find_by_text(self.driver, "*", "Tải xuống", timeout=5)
+                if not download_btn:
+                    download_btn = find_by_text(self.driver, "*", "Download", timeout=3)
+                    
+                if download_btn:
+                    human_click(self.driver, download_btn)
+                    logger.info(f"  -> Clicked 'Tải xuống' for Video {idx+1}")
+                    human_delay(1, 2) # Wait for Radix menu to open
+                    
+                    quality = task.get("flow_settings", {}).get("download_quality", "720p")
+                    quality_btn = find_by_text(self.driver, "span", quality, timeout=3)
+                    if quality_btn:
+                        # Sometimes human_click falls back to JS click which is perfect for Radix menus
+                        human_click(self.driver, quality_btn)
+                        logger.info(f"  -> Selected '{quality}' resolution for Video {idx+1}")
+                    else:
+                        logger.warning(f"  -> Could not find '{quality}' resolution option. It might default or be unavailable.")
+                        
+                    human_delay(5, 8) # Wait for file to download to disk natively
+                    success_count += 1
+                else:
+                    logger.warning(f"  -> Could not find 'Tải xuống' button inside detail view for Video {idx+1}")
+                
+                # 3. Click the Back button "Quay lại" (arrow_back)
+                back_btn = find_by_text(self.driver, "span", "Quay lại", timeout=5)
+                if not back_btn:
+                    back_btn = find_by_text(self.driver, "span", "Back", timeout=3)
+                if not back_btn:
+                    # Fallback to finding back arrow icon
+                    back_icon = find_by_text(self.driver, "i", "arrow_back", timeout=3)
+                    if back_icon:
+                        back_btn = back_icon.find_element(By.XPATH, "./..")
+                        
+                if back_btn:
+                    human_click(self.driver, back_btn)
+                    human_delay(2, 3)
+                else:
+                    logger.warning("  -> Could not find 'Quay lại' button, trying browser escaping")
+                    self.driver.execute_script("document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));")
+                    human_delay(2, 3)
+                    
+            except Exception as e:
+                logger.error(f"  -> Failed to download Video {idx+1}: {e}")
+                
+        if success_count > 0:
+            logger.info(f"Successfully triggered {success_count} native downloads. Waiting final buffer time...")
+            human_delay(15, 20) # Buffer to ensure all active downloads finish before close
         else:
-            raise RuntimeError("Cannot find download button or video source")
+            raise RuntimeError("No videos were successfully downloaded")

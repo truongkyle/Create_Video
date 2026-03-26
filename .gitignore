@@ -5,3 +5,4 @@ __pycache__/
 **/cookies.json
 .agent/
 data/image_source/
+output/
