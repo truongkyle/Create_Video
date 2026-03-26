@@ -16,7 +16,7 @@
       "download_quality": "720p",
       "download_method": "zip"
     },
-    "status": "completed",
+    "status": "processing",
     "timestamp": "2026-03-25 21:58:22",
     "error": null,
     "video_path": null,
@@ -44,14 +44,15 @@
       "download_quality": "720p",
       "download_method": "zip"
     },
-    "status": "pending",
-    "timestamp": null,
+    "status": "processing",
+    "timestamp": "2026-03-26 21:37:27",
     "error": null,
     "video_path": null,
     "_images": [
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-17_e4a70f819b474f15b9eaff98df4e5bb9_master.jpg",
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-2_ec13c9fc73c94adbab8ddb3461c81ad8_master.jpg",
-      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-3_c55433c112b54461bf12fefa64b5a88e_master.jpg"
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-3_c55433c112b54461bf12fefa64b5a88e_master.jpg",
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-6_5f7305f3436d47a8a60068c6e5520397_master.jpg"
     ],
     "error_reason": "ZIP contained no video files (.mp4/.webm/.mov)"
   }

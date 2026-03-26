@@ -257,6 +257,16 @@ class ProgressPanel(ctk.CTkFrame):
             text_color=COLORS["text_muted"],
         ).pack(side="left", padx=(4, SIZES["padding"]))
 
+        # Headless toggle
+        self.headless_var = ctk.BooleanVar(value=True)
+        self.headless_switch = ctk.CTkSwitch(
+            bar, text="Chạy ngầm (Headless)",
+            variable=self.headless_var, font=FONTS["small"],
+            progress_color=COLORS["accent"],
+            text_color=COLORS["text_secondary"]
+        )
+        self.headless_switch.pack(side="left", padx=SIZES["padding_sm"])
+
         # Status
         self.status_label = ctk.CTkLabel(
             bar, text="⏸ Sẵn sàng",

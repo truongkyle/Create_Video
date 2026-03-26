@@ -153,11 +153,13 @@ class VideoAutomationApp(ctk.CTk):
         self.progress_panel.on_pipeline_start(len(tasks), mode_text, tasks=tasks)
         self.set_status("🟢 Đang chạy", COLORS["success"])
 
+        is_headless = self.progress_panel.headless_var.get()
+
         # Launch
         self.api.run_tasks(
             tasks=tasks,
             all_tasks=self.project_panel.tasks,
-            headless=True,
+            headless=is_headless,
             max_workers=max_workers,
         )
 
