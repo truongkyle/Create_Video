@@ -75,11 +75,25 @@ class FlowAutomator:
         self.completed_steps = []
         self.execute_from_step("navigate", task)
 
-    # --- Step 1: Navigate ---
+    # --- Step 1: Navigate and Login ---
     def step_navigate(self, task):
+        from src.cookie_manager import validate_login, first_time_login, COOKIES_PATH, load_cookies, inject_cookies
+        
+        if COOKIES_PATH.exists():
+            cookies = load_cookies()
+            inject_cookies(self.driver, cookies)
+            
         self.driver.get(FLOW_URL)
         human_delay(3, 5)
-        logger.info(f"Navigated to {FLOW_URL}")
+        
+        # Check if we are really logged in or if cookies were invalid/expired
+        if not validate_login(self.driver):
+            logger.warning("Cookies missing or expired. Redirected to login page.")
+            first_time_login(self.driver, FLOW_URL)
+            self.driver.get(FLOW_URL)
+            human_delay(3, 5)
+            
+        logger.info(f"Navigated to {FLOW_URL} and authenticated successfully")
 
     def step_create_project(self, task):
         sel = self.selectors.get("new_project", {})

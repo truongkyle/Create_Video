@@ -43,6 +43,9 @@ def inject_cookies(driver, cookies):
             if same_site in ("Strict", "Lax", "None"):
                 selenium_cookie["sameSite"] = same_site
 
+        if cookie["name"].startswith("__Host-") and "domain" in selenium_cookie:
+            del selenium_cookie["domain"]
+
         try:
             driver.add_cookie(selenium_cookie)
             logger.debug(f"Injected cookie: {cookie['name']}")
