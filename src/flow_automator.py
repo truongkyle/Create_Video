@@ -500,9 +500,12 @@ class FlowAutomator:
         import glob
         from selenium.webdriver.common.by import By
 
-        # Use Chrome's DEFAULT downloads folder — do NOT call set_download_dir()
-        # as it can redirect downloads to unexpected locations via CDP override.
+        # Reset CDP to the system Downloads folder BEFORE scanning existing files.
+        # The pipeline calls set_download_dir() earlier (automation_api.py), so the
+        # CDP path is already pointed at the task folder. We must reset it here or
+        # _wait_for_zip() will watch the wrong directory and always timeout.
         download_dir = str(Path.home() / "Downloads")
+        set_download_dir(self.driver, download_dir)
 
         # Record existing ZIP files so we can detect the new one later
         existing_zips = set(glob.glob(str(Path(download_dir) / "*.zip")))
@@ -611,7 +614,13 @@ class FlowAutomator:
         if extracted_count > 0:
             logger.info(f"✅ Successfully extracted {extracted_count} video(s) to {output_folder}")
         else:
-            raise RuntimeError("ZIP contained no video files (.mp4/.webm/.mov)")
+            try:
+                with zipfile.ZipFile(zip_path, 'r') as zf:
+                    names = zf.namelist()
+                    logger.error(f"ZIP files found: {names}")
+            except Exception:
+                pass
+            raise RuntimeError("ZIP contained no video files (.mp4/.webm/.mov). Google Flow might have failed the render.")
 
     def _wait_for_zip(self, download_dir, existing_zips, timeout=120):
         """Polls the download directory for a new ZIP file, waiting for completion."""

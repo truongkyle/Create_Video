@@ -16,14 +16,15 @@
       "download_quality": "720p",
       "download_method": "zip"
     },
-    "status": "processing",
-    "timestamp": "2026-03-25 21:58:22",
-    "error": null,
+    "status": "failed",
+    "timestamp": "2026-03-27 11:59:05",
+    "error": "Message: no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=146.0.7680.165)\nStacktrace:\n\tundetected_chromedriver!GetHandleVerifier [0x4ecdf3+10b03]\n\tundetected_chromedriver!GetHandleVerifier [0x4ecf24+10c34]\n\tundetected_chromedriver!(No symbol) [0x2d2120]\n\tundetected_chromedriver!(No symbol) [0x2b0c53]\n\tundetected_chromedriver!(No symbol) [0x34431b]\n\tundetected_chromedriver!(No symbol) [0x35a309]\n\tundetected_chromedriver!(No symbol) [0x33d8a6]\n\tundetected_chromedriver!(No symbol) [0x310229]\n\tundetected_chromedriver!(No symbol) [0x310fe4]\n\tundetected_chromedriver!GetHandleVerifier [0x7548b9+2785c9]\n\tundetected_chromedriver!GetHandleVerifier [0x74feb5+273bc5]\n\tundetected_chromedriver!GetHandleVerifier [0x76e06b+291d7b]\n\tundetected_chromedriver!GetHandleVerifier [0x505cc8+299d8]\n\tundetected_chromedriver!GetHandleVerifier [0x50d9fd+3170d]\n\tundetected_chromedriver!GetHandleVerifier [0x4f58c8+195d8]\n\tundetected_chromedriver!GetHandleVerifier [0x4f5a92+197a2]\n\tundetected_chromedriver!GetHandleVerifier [0x4dee9a+2baa]\n\tKERNEL32!BaseThreadInitThunk [0x75c55d49+19]\n\tntdll!RtlInitializeExceptionChain [0x7722d81b+6b]\n\tntdll!RtlGetAppContainerNamedObjectPath [0x7722d7a1+231]\n",
     "video_path": null,
     "_images": [
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-17_e4a70f819b474f15b9eaff98df4e5bb9_master.jpg",
       "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-2_ec13c9fc73c94adbab8ddb3461c81ad8_master.jpg",
-      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-3_c55433c112b54461bf12fefa64b5a88e_master.jpg"
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-3_c55433c112b54461bf12fefa64b5a88e_master.jpg",
+      "D:\\Automation\\Create_Video\\data\\image_source\\hapas26-2-6_5f7305f3436d47a8a60068c6e5520397_master.jpg"
     ],
     "error_reason": "ZIP contained no video files (.mp4/.webm/.mov)"
   },

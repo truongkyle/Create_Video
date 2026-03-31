@@ -17,7 +17,7 @@ from src.json_handler import load_tasks, update_task_status, get_images_from_fol
 from src.browser_controller import create_driver, close_driver, human_delay, set_download_dir
 from src.flow_automator import FlowAutomator
 from src.retry_engine import RetryEngine
-from src.download_manager import setup_download_dir, wait_for_download, rename_video, verify_download
+from src.download_manager import setup_download_dir
 
 logger = logging.getLogger("flow_automation")
 
@@ -275,19 +275,10 @@ class AutomationAPI:
         try:
             retry_engine.execute_task_with_retry(task)
 
-            # Handle download
-            if download_dir:
-                video_path = wait_for_download(download_dir)
-                if video_path and verify_download(video_path):
-                    final_path = rename_video(video_path, product, download_dir)
-                    if global_idx >= 0:
-                        update_task_status(all_tasks, global_idx, "completed", video_path=final_path)
-                else:
-                    if global_idx >= 0:
-                        update_task_status(all_tasks, global_idx, "completed", error="Download verification failed")
-            else:
-                if global_idx >= 0:
-                    update_task_status(all_tasks, global_idx, "completed")
+            # step_download() in FlowAutomator handles the entire download process
+            # (both 'zip' and 'individual' methods). No need to wait/verify here.
+            if global_idx >= 0:
+                update_task_status(all_tasks, global_idx, "completed")
 
             with self._lock:
                 results["success"] += 1

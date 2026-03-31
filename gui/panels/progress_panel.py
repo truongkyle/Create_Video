@@ -47,15 +47,20 @@ class ProgressPanel(ctk.CTkFrame):
         mid_top.columnconfigure(0, weight=1)
         self._build_step_indicators(mid_top)
 
-        # ── Main area: Task list (left) + Log viewer (right) ──
+        # ── Main area: Task list (left) + Tabview (right) ──
         main_area = ctk.CTkFrame(self, fg_color="transparent")
         main_area.pack(fill="both", expand=True, pady=(SIZES["padding_sm"], 0))
-        main_area.columnconfigure(0, weight=0, minsize=260)
+        main_area.columnconfigure(0, weight=0, minsize=500)
         main_area.columnconfigure(1, weight=1)
         main_area.rowconfigure(0, weight=1)
 
+        self._selected_task_id = None
+        self._task_frames = {}    # To manage bg_color highlights
+        self._task_logs = {}      # {id(task): log_string}
+        self._worker_to_task = {} # {worker_id: id(task)}
+
         self._build_task_list(main_area)
-        self._build_log_viewer(main_area)
+        self._build_content_tabs(main_area)
 
         # ── Bottom: Stop button ──
         self._build_controls()
@@ -156,7 +161,7 @@ class ProgressPanel(ctk.CTkFrame):
             parent, fg_color=COLORS["bg_card"],
             corner_radius=SIZES["corner_radius"],
             border_color=COLORS["border"], border_width=1,
-            width=260,
+            width=500,
         )
         task_frame.grid(row=0, column=0, sticky="nsew", padx=(0, SIZES["padding_sm"]))
         task_frame.grid_propagate(False)
@@ -178,40 +183,65 @@ class ProgressPanel(ctk.CTkFrame):
         self._task_scroll.pack(fill="both", expand=True, padx=4, pady=(0, 4))
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    #  LOG VIEWER
+    #  CONTENT TABS (Right)
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    def _build_log_viewer(self, parent):
-        log_frame = ctk.CTkFrame(
+    def _build_content_tabs(self, parent):
+        self.content_tabs = ctk.CTkTabview(
             parent, fg_color=COLORS["bg_card"],
+            segmented_button_fg_color=COLORS["bg_input"],
+            segmented_button_selected_color=COLORS["accent"],
+            segmented_button_selected_hover_color=COLORS["accent_hover"],
+            segmented_button_unselected_color=COLORS["bg_input"],
+            segmented_button_unselected_hover_color=COLORS["bg_hover"],
             corner_radius=SIZES["corner_radius"],
-            border_color=COLORS["border"], border_width=1,
         )
-        log_frame.grid(row=0, column=1, sticky="nsew")
+        self.content_tabs.grid(row=0, column=1, sticky="nsew", padx=2)
 
-        header = ctk.CTkFrame(log_frame, fg_color="transparent")
-        header.pack(fill="x", padx=SIZES["padding"], pady=(SIZES["padding_sm"], 0))
+        self.tab_log_global = self.content_tabs.add("📜 Log (Chung)")
+        self.tab_log_task = self.content_tabs.add("📜 Log (Task)")
+        self.tab_result = self.content_tabs.add("🎬 Kết quả")
 
-        ctk.CTkLabel(
-            header, text="📜 Log", font=FONTS["subheading"],
-            text_color=COLORS["text_primary"],
-        ).pack(side="left")
+        # ── Tab: Log (Global) ──
+        self.log_global_textbox = self._create_log_textbox(self.tab_log_global)
 
-        ctk.CTkButton(
+        # ── Tab: Log (Task) ──
+        self.log_task_textbox = self._create_log_textbox(self.tab_log_task)
+
+        # ── Tab: Result ──
+        self.result_frame = ctk.CTkFrame(self.tab_result, fg_color="transparent")
+        self.result_frame.pack(fill="both", expand=True, padx=SIZES["padding"], pady=SIZES["padding"])
+
+        self.result_lbl_status = ctk.CTkLabel(
+            self.result_frame, text="Vui lòng chọn 1 dự án bên trái",
+            font=FONTS["body"], text_color=COLORS["text_muted"]
+        )
+        self.result_lbl_status.pack(pady=40)
+
+        self.result_content_frame = ctk.CTkFrame(self.result_frame, fg_color="transparent")
+        # will be populated on task selection
+
+    def _create_log_textbox(self, parent_tab):
+        header = ctk.CTkFrame(parent_tab, fg_color="transparent")
+        header.pack(fill="x", pady=(0, SIZES["padding_sm"]))
+        
+        btn_clear = ctk.CTkButton(
             header, text="🗑 Xóa log", font=FONTS["small"],
             width=80, height=24,
             fg_color=COLORS["bg_hover"], hover_color=COLORS["border"],
-            command=self._clear_log,
-        ).pack(side="right")
+        )
+        btn_clear.pack(side="right")
 
-        self.log_textbox = ctk.CTkTextbox(
-            log_frame, font=FONTS["mono"],
+        tb = ctk.CTkTextbox(
+            parent_tab, font=FONTS["mono"],
             fg_color=COLORS["bg_input"], text_color=COLORS["text_primary"],
             border_color=COLORS["border"], border_width=1,
             corner_radius=SIZES["corner_radius"],
             state="disabled",
         )
-        self.log_textbox.pack(fill="both", expand=True, padx=SIZES["padding_sm"], pady=SIZES["padding_sm"])
+        tb.pack(fill="both", expand=True)
+        btn_clear.configure(command=lambda: self._clear_log(tb))
+        return tb
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #  CONTROLS
@@ -320,6 +350,14 @@ class ProgressPanel(ctk.CTkFrame):
         """Called when a step starts."""
         self.current_task_label.configure(text=f"📹 {task_name} — Step {step_idx + 1}/{total_steps}")
 
+        # Track worker to task for logs
+        if worker_id is not None:
+            # Find the task matching the name
+            for t in self._task_list_tasks:
+                if t.get("ten_san_pham") == task_name:
+                    self._worker_to_task[worker_id] = id(t)
+                    break
+
         # Reset all steps then highlight current
         for key, lbl in self._step_labels.items():
             lbl.configure(text_color=STEP_COLORS["waiting"], fg_color=COLORS["bg_input"])
@@ -336,14 +374,38 @@ class ProgressPanel(ctk.CTkFrame):
                 )
 
     def on_log(self, message, level):
-        """Append a log line to the log viewer."""
+        """Append a log line to both global and task-specific log viewers."""
         timestamp = datetime.now().strftime("%H:%M:%S")
         line = f"[{timestamp}] {message}\n"
 
-        self.log_textbox.configure(state="normal")
-        self.log_textbox.insert("end", line)
-        self.log_textbox.see("end")
-        self.log_textbox.configure(state="disabled")
+        # Global Log
+        self.log_global_textbox.configure(state="normal")
+        self.log_global_textbox.insert("end", line)
+        self.log_global_textbox.see("end")
+        self.log_global_textbox.configure(state="disabled")
+
+        # Task-specific Log Routing
+        target_task_id = None
+        if message.startswith("[W") and "]" in message:
+            try:
+                # Extract worker ID, e.g. "[W0] message"
+                w_str = message.split("]")[0].replace("[W", "")
+                w_id = int(w_str)
+                target_task_id = self._worker_to_task.get(w_id)
+            except Exception:
+                pass
+
+        if target_task_id:
+            if target_task_id not in self._task_logs:
+                self._task_logs[target_task_id] = ""
+            self._task_logs[target_task_id] += line
+
+            # If this task is currently selected, update the inner task log view
+            if target_task_id == self._selected_task_id:
+                self.log_task_textbox.configure(state="normal")
+                self.log_task_textbox.insert("end", line)
+                self.log_task_textbox.see("end")
+                self.log_task_textbox.configure(state="disabled")
 
     def on_progress(self, completed, total):
         """Update progress bar and label."""
@@ -380,10 +442,10 @@ class ProgressPanel(ctk.CTkFrame):
             lbl.configure(text_color=STEP_COLORS["waiting"], fg_color=COLORS["bg_input"])
         self.current_task_label.configure(text="")
 
-    def _clear_log(self):
-        self.log_textbox.configure(state="normal")
-        self.log_textbox.delete("0.0", "end")
-        self.log_textbox.configure(state="disabled")
+    def _clear_log(self, textbox):
+        textbox.configure(state="normal")
+        textbox.delete("0.0", "end")
+        textbox.configure(state="disabled")
 
     def refresh_queue(self, tasks):
         """Update the Render Queue list when JSON changes."""
@@ -395,11 +457,14 @@ class ProgressPanel(ctk.CTkFrame):
         self._task_list_tasks = tasks
 
         for i, task in enumerate(tasks):
-            name = task.get("ten_san_pham", f"Task {i+1}")[:22]
+            name = task.get("ten_san_pham", f"Task {i+1}")
             status = task.get("status", "pending") or "pending"
             
-            item = ctk.CTkFrame(self._task_scroll, fg_color="transparent", corner_radius=4)
-            item.pack(fill="x", pady=1)
+            item = ctk.CTkFrame(
+                self._task_scroll, fg_color="transparent", corner_radius=6,
+                height=36, border_width=0,
+            )
+            item.pack(fill="x", pady=2, padx=2)
 
             var = ctk.BooleanVar(value=False)
             self._check_vars[i] = var
@@ -442,6 +507,80 @@ class ProgressPanel(ctk.CTkFrame):
                 "frame": item, "status_lbl": status_lbl,
                 "step_lbl": step_lbl, "name_lbl": name_lbl,
             }
+            self._task_frames[id(task)] = item
+
+            # Bind click events for selection
+            def make_handler(tid=id(task), t=task):
+                return lambda e: self._select_task(tid, t)
+                
+            for w in [item, status_lbl, name_lbl, step_lbl]:
+                w.bind("<Button-1>", make_handler())
+
+    def _select_task(self, task_id, task):
+        """Highlight row and show task details/logs."""
+        # Unhighlight previous
+        if self._selected_task_id and self._selected_task_id in self._task_frames:
+            self._task_frames[self._selected_task_id].configure(
+                fg_color="transparent", border_width=0,
+            )
+            # Reset text color of previous name
+            prev_item = self._task_items.get(self._selected_task_id)
+            if prev_item:
+                prev_item["name_lbl"].configure(text_color=COLORS["text_primary"])
+            
+        self._selected_task_id = task_id
+        self._task_frames[task_id].configure(
+            fg_color="#1a2332", border_width=2, border_color=COLORS["accent"],
+        )
+        # Make selected name brighter
+        current_item = self._task_items.get(task_id)
+        if current_item:
+            current_item["name_lbl"].configure(text_color=COLORS["accent"])
+
+        # Update Task Log View
+        self.log_task_textbox.configure(state="normal")
+        self.log_task_textbox.delete("0.0", "end")
+        if task_id in self._task_logs:
+            self.log_task_textbox.insert("end", self._task_logs[task_id])
+        self.log_task_textbox.configure(state="disabled")
+
+        # Update Results View
+        self.result_lbl_status.pack_forget()
+        self.result_content_frame.destroy()
+        
+        self.result_content_frame = ctk.CTkFrame(self.result_frame, fg_color="transparent")
+        self.result_content_frame.pack(fill="both", expand=True)
+
+        ctk.CTkLabel(
+            self.result_content_frame, text=task.get("ten_san_pham", "Task"),
+            font=FONTS["heading"], text_color=COLORS["text_primary"]
+        ).pack(anchor="w", pady=(0, 10))
+
+        status = task.get("status", "pending")
+        status_text = {
+            "completed": "✅ Hoàn tất thành công",
+            "failed": f"❌ Lỗi: {task.get('error', 'Unknown')}",
+            "skipped": "⏭ Bị bỏ qua",
+            "processing": "🔵 Đang xử lý...",
+            "pending": "⏳ Đang chờ chạy"
+        }.get(status, status)
+        
+        status_color = {
+            "completed": COLORS["success"], "failed": COLORS["error"],
+            "processing": COLORS["accent"]
+        }.get(status, COLORS["text_secondary"])
+
+        ctk.CTkLabel(
+            self.result_content_frame, text=status_text,
+            font=FONTS["body"], text_color=status_color
+        ).pack(anchor="w", pady=4)
+
+        if status == "completed":
+            path = task.get("video_path") or task.get("link_folder_video", "")
+            ctk.CTkLabel(
+                self.result_content_frame, text=f"📁 Đã tải về: {path}",
+                font=FONTS["small"], text_color=COLORS["text_muted"], wraplength=400, justify="left"
+            ).pack(anchor="w", pady=10)
 
     def _populate_task_list(self, tasks):
         """Build/update task list items when run starts. We just update statuses here."""
